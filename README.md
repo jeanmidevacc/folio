@@ -2,6 +2,17 @@
 
 Build beautiful, self-contained HTML reports from Python analysis.
 
+## Why folio exists
+
+Two libraries shaped how I thought about sharing data science work:
+
+- **[datapane](https://github.com/datapane/datapane)** — the cleanest Python-native report builder I had ever used. Block-based, self-contained HTML output, dead-simple API. It was decommissioned in 2023 and the SaaS shut down shortly after.
+- **[Facets](https://github.com/PAIR-code/facets)** (PAIR / Google) — specifically *Facets Dive*, a brilliant interactive dot explorer that let you slice any dataset visually with zero configuration. The project went largely unmaintained and quietly disappeared from most data science workflows.
+
+I never found a substitute that matched either of them, let alone both at once. folio is my attempt to fill that gap: a datapane-style block and layout system with a Facets Dive-class explorer built in, fully offline, no cloud account required.
+
+Building folio also serves a second purpose: it is a real-world, non-trivial Python project used to benchmark coding agents such as [Claude Code](https://github.com/anthropics/claude-code). Designing a library from original source code — with concept ofblock hierarchy, rendering pipeline, theming, interactive components — gives a coding agent enough surface area to show where it genuinely helps and where it still struggles.
+
 ```python
 import folio as fl
 
