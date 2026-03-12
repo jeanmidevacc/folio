@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ report_name }}</title>
+  <style>
+{{ report_css }}
+{{ css_vars }}
+  </style>
+  {% if head_scripts %}{{ head_scripts }}{% endif %}
+</head>
+<body>
+  <div class="fl-report">
+    {% if show_header %}
+    <header class="fl-report__header">
+      <span class="fl-report__title">{{ report_name }}</span>
+      <time class="fl-report__date" datetime="{{ report_date_iso }}">{{ report_date }}</time>
+    </header>
+    {% endif %}
+    <main class="fl-report__body">
+      {{ content_html }}
+    </main>
+  </div>
+  <script>{{ report_js }}</script>
+</body>
+</html>

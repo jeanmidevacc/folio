@@ -1,0 +1,240 @@
+"""Plot block rendering — library-agnostic figure-to-HTML conversion.
+
+Detection strategy
+------------------
+We use duck typing on the figure's module path rather than ``isinstance``
+checks so that folio never hard-imports any plotting library.  Only the
+library actually used is imported at render time.
+
+Library support summary
+-----------------------
+| Library    | Output   | Self-contained | Notes                              |
+|------------|----------|----------------|------------------------------------|
+| Matplotlib | SVG      | ✓ always       | Handles Figure and Axes objects    |
+| Seaborn    | SVG      | ✓ always       | Via underlying Matplotlib figure   |
+| Plotnine   | SVG      | ✓ always       | Via underlying Matplotlib figure   |
+| Plotly     | HTML+JS  | ✓ if installed | plotlyjs embedded once per report  |
+| Bokeh      | iframe   | ✓ always       | INLINE resources, base64 srcdoc    |
+| Altair     | iframe   | ⚠ CDN needed  | Vega runtime from CDN (Phase 6     |
+|            |          |                | will bundle it for full offline)   |
+"""
+from __future__ import annotations
+
+import base64
+import html as _html
+import io
+import re
+import typing as t
+import warnings
+
+from folio._error import FolioError
+
+if t.TYPE_CHECKING:
+    from folio.blocks.asset import Plot
+    from folio.blocks.base import BaseBlock
+
+_SUPPORTED = {"altair", "bokeh", "matplotlib", "plotly"}
+
+
+# ── detection ─────────────────────────────────────────────────────────────────
+
+
+def detect_library(fig: t.Any) -> str:
+    """Return the library name for *fig*, or raise :class:`~folio.FolioError`."""
+    module = type(fig).__module__.split(".")[0]
+
+    if module == "plotly":
+        return "plotly"
+    if module in ("altair",):
+        return "altair"
+    if module == "bokeh":
+        return "bokeh"
+    # matplotlib-compatible: matplotlib, seaborn FacetGrid, plotnine ggplot
+    if hasattr(fig, "savefig") or hasattr(fig, "get_figure"):
+        return "matplotlib"
+
+    raise FolioError(
+        f"Unsupported figure type: {type(fig).__module__}.{type(fig).__qualname__!r}. "
+        f"Supported libraries: {', '.join(sorted(_SUPPORTED))}."
+    )
+
+
+# ── tree scan (pre-pass) ──────────────────────────────────────────────────────
+
+
+def scan_for_plots(root: BaseBlock) -> set[str]:
+    """Walk *root* depth-first and return the set of libraries used in Plot blocks."""
+    from folio.blocks.asset import Plot as PlotBlock
+    from folio.blocks.base import ContainerBlock
+
+    needed: set[str] = set()
+    stack: list[BaseBlock] = [root]
+
+    while stack:
+        block = stack.pop()
+        if isinstance(block, PlotBlock):
+            try:
+                needed.add(detect_library(block.figure))
+            except FolioError:
+                pass  # surface the error properly at render time
+        if isinstance(block, ContainerBlock):
+            stack.extend(block.blocks)
+
+    return needed
+
+
+# ── runtime JS (embedded once in <head>) ──────────────────────────────────────
+
+
+def get_runtime_scripts(libraries: set[str]) -> str:
+    """Return ``<script>`` tags to embed in ``<head>`` for *libraries*.
+
+    Currently only Plotly requires a bundled runtime; other libraries either
+    need no JS (Matplotlib/SVG) or embed their runtime per-figure (Bokeh/iframe).
+    """
+    parts: list[str] = []
+
+    if "plotly" in libraries:
+        parts.append(_plotlyjs_script())
+
+    return "\n".join(parts)
+
+
+def _plotlyjs_script() -> str:
+    try:
+        from plotly.offline import get_plotlyjs
+
+        js = get_plotlyjs()
+        return f"<script>{js}</script>"
+    except ImportError as exc:
+        raise FolioError(
+            "plotly is not installed. Run: pip install plotly"
+        ) from exc
+
+
+# ── per-library renderers ─────────────────────────────────────────────────────
+
+
+def _render_matplotlib(fig: t.Any, responsive: bool) -> str:
+    # Accept both Figure and Axes-like objects (seaborn, plotnine, etc.)
+    actual = fig.get_figure() if (hasattr(fig, "get_figure") and not hasattr(fig, "savefig")) else fig
+
+    buf = io.StringIO()
+    actual.savefig(buf, format="svg", bbox_inches="tight")
+    svg = buf.getvalue()
+    buf.close()
+
+    # Strip XML / DOCTYPE preamble — keep only the <svg> element
+    if "<svg" in svg:
+        svg = svg[svg.index("<svg"):]
+
+    if responsive:
+        # Matplotlib 3.10+ escapes quotes inside SVG attributes (width=\"500pt\")
+        svg = re.sub(r'(<svg\b[^>]*?)\s+width=\\?"[^"\\]*\\?"', r'\1 width="100%"', svg, count=1)
+        svg = re.sub(r'(<svg\b[^>]*?)\s+height=\\?"[^"\\]*\\?"', r'\1', svg, count=1)
+
+    return svg
+
+
+def _render_plotly(fig: t.Any, responsive: bool) -> str:
+    try:
+        import plotly.io as pio
+    except ImportError as exc:
+        raise FolioError("plotly is not installed. Run: pip install plotly") from exc
+
+    return pio.to_html(
+        fig,
+        full_html=False,
+        include_plotlyjs=False,   # already embedded in <head> via get_runtime_scripts()
+        config={"responsive": responsive},
+    )
+
+
+def _render_altair(fig: t.Any, responsive: bool) -> str:
+    try:
+        import altair as alt  # noqa: F401
+    except ImportError as exc:
+        raise FolioError("altair is not installed. Run: pip install altair") from exc
+
+    warnings.warn(
+        "Altair charts load Vega+VegaLite from cdn.jsdelivr.net. "
+        "They will not display in offline environments. "
+        "Full self-contained Altair support is planned for Phase 6 (DataDive).",
+        UserWarning,
+        stacklevel=4,
+    )
+
+    if responsive:
+        try:
+            fig = fig.properties(width="container")
+        except Exception:
+            pass
+
+    chart_html = fig.to_html()
+    b64 = base64.b64encode(chart_html.encode("utf-8")).decode("ascii")
+    return (
+        f'<iframe src="data:text/html;base64,{b64}" '
+        f'width="100%" height="500" style="border:none;" title="Altair chart" '
+        f'loading="lazy"></iframe>'
+    )
+
+
+def _render_bokeh(fig: t.Any) -> str:
+    try:
+        from bokeh.embed import file_html
+        from bokeh.resources import INLINE
+    except ImportError as exc:
+        raise FolioError("bokeh is not installed. Run: pip install bokeh") from exc
+
+    full_html = file_html(fig, resources=INLINE)
+    b64 = base64.b64encode(full_html.encode("utf-8")).decode("ascii")
+    return (
+        f'<iframe src="data:text/html;base64,{b64}" '
+        f'width="100%" height="500" style="border:none;" title="Bokeh chart" '
+        f'loading="lazy"></iframe>'
+    )
+
+
+# ── public render entry ───────────────────────────────────────────────────────
+
+
+def render_figure(block: Plot) -> str:
+    """Render a :class:`~folio.Plot` block to a self-contained HTML fragment."""
+    fig = block.figure
+
+    # Normalise Axes → Figure for matplotlib-compatible objects
+    if hasattr(fig, "get_figure") and not hasattr(fig, "savefig"):
+        fig = fig.get_figure()
+
+    try:
+        lib = detect_library(fig)
+    except FolioError as exc:
+        return (
+            f'<div class="fl-placeholder">'
+            f"⚠ {_html.escape(str(exc))}"
+            f"</div>"
+        )
+
+    try:
+        if lib == "matplotlib":
+            inner = _render_matplotlib(fig, block.responsive)
+        elif lib == "plotly":
+            inner = _render_plotly(fig, block.responsive)
+        elif lib == "altair":
+            inner = _render_altair(fig, block.responsive)
+        elif lib == "bokeh":
+            inner = _render_bokeh(fig)
+        else:
+            inner = f'<div class="fl-placeholder">Unknown library: {lib}</div>'
+    except FolioError as exc:
+        return f'<div class="fl-placeholder">⚠ {_html.escape(str(exc))}</div>'
+
+    caption_html = (
+        f'<figcaption class="fl-plot__caption">{_html.escape(block.caption)}</figcaption>'
+        if block.caption
+        else ""
+    )
+    return f'<figure class="fl-block fl-plot">{inner}{caption_html}</figure>'
+
+
+__all__ = ["detect_library", "get_runtime_scripts", "render_figure", "scan_for_plots"]
