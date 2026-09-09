@@ -16,7 +16,7 @@ Building bulletin also serves a second purpose: it is a real-world, non-trivial 
 ```python
 import bulletin as bn
 
-report = bn.Blocks(
+report = bn.Bulletin(
     bn.Text("# Sales Analysis — Q1 2024"),
     bn.Group(
         bn.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False),
@@ -31,7 +31,7 @@ report = bn.Blocks(
     bn.DataDive(df),
 )
 
-bn.save_report(report, "q1_analysis.html")
+bn.save(report, "q1_analysis.html")
 ```
 
 ## Features
@@ -62,8 +62,8 @@ import bulletin as bn
 
 df = pd.read_csv("sales.csv")
 
-bn.save_report(
-    bn.Blocks(
+bn.save(
+    bn.Bulletin(
         bn.Text("# My Report"),
         bn.DataTable(df),
     ),
@@ -77,18 +77,18 @@ To get an HTML string instead of writing a file (useful in Jupyter):
 ```python
 from IPython.display import HTML, display
 
-display(HTML(bn.stringify_report(bn.Blocks(bn.Text("# Hello")))))
+display(HTML(bn.stringify(bn.Bulletin(bn.Text("# Hello")))))
 ```
 
 ---
 
 ## API
 
-### `bn.save_report`
+### `bn.save`
 
 ```python
-bn.save_report(
-    blocks,                  # Blocks, list, or a single block
+bn.save(
+    blocks,                  # Bulletin, list, or a single block
     path,                    # destination file — e.g. "report.html"
     *,
     open=False,              # open in default browser after saving
@@ -97,10 +97,10 @@ bn.save_report(
 )
 ```
 
-### `bn.stringify_report`
+### `bn.stringify`
 
 ```python
-html: str = bn.stringify_report(
+html: str = bn.stringify(
     blocks,
     *,
     name="Report",
@@ -138,7 +138,7 @@ Supports headings, bold, italics, inline code, blockquotes, tables, and lists.
 ```python
 bn.Code("SELECT * FROM orders LIMIT 10", language="sql")
 bn.Code(
-    "import bulletin as bn\nfl.save_report(bn.Blocks(bn.Text('# Hi')), 'out.html')",
+    "import bulletin as bn\nfl.save(bn.Bulletin(bn.Text('# Hi')), 'out.html')",
     language="python",
     caption="Minimal report",
 )
@@ -226,7 +226,7 @@ bn.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `*blocks` | `BaseBlock` | — | Child blocks (positional) |
+| `*blocks` | `Block` | — | Child blocks (positional) |
 | `columns` | `int` | `1` | Number of columns |
 | `widths` | `list[int \| float]` | `None` | Relative column widths — must match `columns` |
 | `valign` | `VAlign \| str` | `"top"` | Vertical alignment: `top`, `center`, `bottom` |
@@ -249,7 +249,7 @@ bn.Select(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `*blocks` | `BaseBlock` | — | Child blocks — each should have a `label` |
+| `*blocks` | `Block` | — | Child blocks — each should have a `label` |
 | `type` | `SelectType \| str` | `"tabs"` | `"tabs"` or `"dropdown"` |
 
 > Warns if fewer than 2 children are provided.
@@ -270,17 +270,17 @@ bn.Toggle(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `*blocks` | `BaseBlock` | — | Content blocks (multiple are auto-wrapped in a `Group`) |
+| `*blocks` | `Block` | — | Content blocks (multiple are auto-wrapped in a `Group`) |
 | `label` | `str` | `None` | Clickable toggle label |
 
 ---
 
 #### `bn.Page` — Top-level page tab
 
-Use at the root of `Blocks` to create multi-page reports. Pages are converted to a top-level tab bar during rendering.
+Use at the root of `Bulletin` to create multi-page reports. Pages are converted to a top-level tab bar during rendering.
 
 ```python
-bn.Blocks(
+bn.Bulletin(
     bn.Page(summary_group, title="Summary"),
     bn.Page(detail_group, title="Detail"),
 )
@@ -288,24 +288,24 @@ bn.Blocks(
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `*blocks` | `BaseBlock` | — | Page content |
+| `*blocks` | `Block` | — | Page content |
 | `title` | `str` | `None` | Tab title |
 
 > Nested `Page` blocks are not supported — use `Select` and `Group` instead.
 
 ---
 
-#### `bn.Blocks` — Root document container
+#### `bn.Bulletin` — Root document container
 
-Top-level wrapper passed to `save_report`. Accepts any combination of blocks.
+Top-level wrapper passed to `save`. Accepts any combination of blocks.
 
 ```python
-report = bn.Blocks(
+report = bn.Bulletin(
     bn.Text("# My Report"),
     bn.Plot(fig),
     bn.DataTable(df),
 )
-bn.save_report(report, "report.html")
+bn.save(report, "report.html")
 ```
 
 ---
@@ -427,16 +427,16 @@ bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
 
 ## Theming
 
-Pass a `Formatting` instance to `save_report` to control the visual style.
+Pass a `Formatting` instance to `save` to control the visual style.
 
 ### Built-in presets
 
 ```python
-bn.save_report(blocks, "out.html", formatting=bn.Formatting.dark())
-bn.save_report(blocks, "out.html", formatting=bn.Formatting.corporate())
-bn.save_report(blocks, "out.html", formatting=bn.Formatting.minimal())
-bn.save_report(blocks, "out.html", formatting=bn.Formatting.ocean())
-bn.save_report(blocks, "out.html", formatting=bn.Formatting.warm())
+bn.save(blocks, "out.html", formatting=bn.Formatting.dark())
+bn.save(blocks, "out.html", formatting=bn.Formatting.corporate())
+bn.save(blocks, "out.html", formatting=bn.Formatting.minimal())
+bn.save(blocks, "out.html", formatting=bn.Formatting.ocean())
+bn.save(blocks, "out.html", formatting=bn.Formatting.warm())
 ```
 
 | Preset | Description |
@@ -497,8 +497,8 @@ formatting=bn.Formatting(
 ```python
 import bulletin as bn
 
-bn.save_report(
-    bn.Blocks(
+bn.save(
+    bn.Bulletin(
         bn.Text("# Sales Analysis — 2023"),
 
         bn.Group(
@@ -549,8 +549,8 @@ fig_plotly = px.scatter(df, x="revenue", y="margin_pct", color="region")
 fig_mpl, ax = plt.subplots()
 ax.hist(df["revenue"].dropna(), bins=30)
 
-bn.save_report(
-    bn.Blocks(
+bn.save(
+    bn.Bulletin(
         bn.Text("# Chart comparison"),
         bn.Group(
             bn.Plot(fig_plotly, caption="Interactive (Plotly)"),
@@ -587,8 +587,8 @@ bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```python
 from IPython.display import HTML, display
 
-display(HTML(bn.stringify_report(
-    bn.Blocks(bn.Text("# Quick look"), bn.DataProfile(df)),
+display(HTML(bn.stringify(
+    bn.Bulletin(bn.Text("# Quick look"), bn.DataProfile(df)),
     name="Quick look",
 )))
 ```

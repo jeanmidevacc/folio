@@ -8,7 +8,7 @@ import pytest
 from bs4 import BeautifulSoup
 
 from bulletin.blocks.data import DataDive
-from bulletin.blocks.layout import Blocks
+from bulletin.blocks.layout import Bulletin
 from bulletin.renderers.datadive import _col_kind, _pick_defaults, render_datadive
 from bulletin.renderers.html import render_report
 
@@ -180,12 +180,12 @@ class TestRenderDataDive:
 
 class TestDataDiveInReport:
     def test_datadive_in_report(self, simple_df):
-        html = render_report(Blocks(DataDive(simple_df)))
+        html = render_report(Bulletin(DataDive(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         assert soup.find("div", class_="bn-datadive") is not None
 
     def test_self_contained(self, simple_df):
-        html = render_report(Blocks(DataDive(simple_df)))
+        html = render_report(Bulletin(DataDive(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")

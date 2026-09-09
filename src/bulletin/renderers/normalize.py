@@ -2,23 +2,23 @@
 
 Transforms the block tree before HTML rendering:
 - Converts top-level ``Page`` blocks into a ``Select(TABS)`` of ``Group`` blocks.
-- Validates that the root ``Blocks`` container is not empty.
+- Validates that the root ``Bulletin`` container is not empty.
 """
 from __future__ import annotations
 
 import copy
 
 from bulletin._error import BulletinError
-from bulletin.blocks.layout import Blocks, Group, Page, Select, SelectType
+from bulletin.blocks.layout import Bulletin, Group, Page, Select, SelectType
 
 
-def normalize(blocks: Blocks) -> Blocks:
+def normalize(blocks: Bulletin) -> Bulletin:
     """Return a normalized copy of *blocks*, ready for rendering.
 
     Mutations applied (in order):
 
     1. **Empty root check** — raises :class:`~bulletin.BulletinError` if the root
-       ``Blocks`` has zero children.
+       ``Bulletin`` has zero children.
     2. **Page → Select conversion** — if *all* top-level children are
        :class:`~bulletin.Page` blocks they are converted to a single
        ``Select(type=TABS)`` whose children are labelled ``Group`` blocks,
@@ -29,7 +29,7 @@ def normalize(blocks: Blocks) -> Blocks:
 
     if len(root.blocks) == 0:
         raise BulletinError(
-            "Cannot render an empty Blocks container — add at least one block."
+            "Cannot render an empty Bulletin container — add at least one block."
         )
 
     has_pages = [isinstance(b, Page) for b in root.blocks]

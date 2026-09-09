@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from bulletin._error import BulletinError
 from bulletin.blocks.asset import Plot
-from bulletin.blocks.layout import Blocks
+from bulletin.blocks.layout import Bulletin
 from bulletin.renderers.plot import detect_library, render_figure, scan_for_plots
 
 
@@ -57,13 +57,13 @@ class TestScanForPlots:
     def test_empty_blocks_returns_empty_set(self):
         from bulletin.blocks.text import Text
 
-        root = Blocks(Text("hi"))
+        root = Bulletin(Text("hi"))
         assert scan_for_plots(root) == set()
 
     def test_finds_matplotlib_plot(self):
         mpl = pytest.importorskip("matplotlib.pyplot")
         fig, _ = mpl.subplots()
-        root = Blocks(Plot(fig))
+        root = Bulletin(Plot(fig))
         libs = scan_for_plots(root)
         mpl.close("all")
         assert "matplotlib" in libs
@@ -71,7 +71,7 @@ class TestScanForPlots:
     def test_finds_plotly_plot(self):
         go = pytest.importorskip("plotly.graph_objects")
         fig = go.Figure()
-        root = Blocks(Plot(fig))
+        root = Bulletin(Plot(fig))
         libs = scan_for_plots(root)
         assert "plotly" in libs
 
@@ -80,7 +80,7 @@ class TestScanForPlots:
         from bulletin.blocks.layout import Group
 
         fig, _ = mpl.subplots()
-        root = Blocks(Group(Plot(fig)))
+        root = Bulletin(Group(Plot(fig)))
         libs = scan_for_plots(root)
         mpl.close("all")
         assert "matplotlib" in libs
@@ -90,14 +90,14 @@ class TestScanForPlots:
         go = pytest.importorskip("plotly.graph_objects")
         fig_mpl, _ = mpl.subplots()
         fig_plotly = go.Figure()
-        root = Blocks(Plot(fig_mpl), Plot(fig_plotly))
+        root = Bulletin(Plot(fig_mpl), Plot(fig_plotly))
         libs = scan_for_plots(root)
         mpl.close("all")
         assert libs == {"matplotlib", "plotly"}
 
     def test_unsupported_figure_skipped_in_scan(self):
         """scan_for_plots should not raise for unsupported figures — errors surface at render."""
-        root = Blocks(Plot(object()))
+        root = Bulletin(Plot(object()))
         # Should not raise
         libs = scan_for_plots(root)
         assert libs == set()
@@ -217,7 +217,7 @@ class TestRenderReportWithPlot:
 
         fig, ax = mpl.subplots()
         ax.plot([1, 2, 3])
-        html = render_report(Blocks(Plot(fig)))
+        html = render_report(Bulletin(Plot(fig)))
         mpl.close("all")
         soup = BeautifulSoup(html, "html.parser")
         assert soup.find("svg") is not None
@@ -230,6 +230,6 @@ class TestRenderReportWithPlot:
         from bulletin.renderers.html import render_report
 
         fig = go.Figure()
-        html = render_report(Blocks(Plot(fig), Plot(go.Figure())))
+        html = render_report(Bulletin(Plot(fig), Plot(go.Figure())))
         # plotlyjs bundle should appear exactly once in <head>
         assert html.count("var Plotly") <= 1

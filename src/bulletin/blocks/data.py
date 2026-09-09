@@ -11,7 +11,7 @@ from __future__ import annotations
 import typing as t
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import BaseBlock, BlockId
+from bulletin.blocks.base import Block, BlockId
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -26,7 +26,7 @@ def _require_pandas(block_name: str) -> None:
         ) from exc
 
 
-class DataProfile(BaseBlock):
+class DataProfile(Block):
     """Per-column statistical profiling block.
 
     For each column in the DataFrame, renders:
@@ -60,7 +60,7 @@ class DataProfile(BaseBlock):
         self.max_categories = max_categories
 
 
-class DataDive(BaseBlock):
+class DataDive(Block):
     """Interactive dot explorer — similar to Google's Facets Dive.
 
     Each row in the DataFrame becomes a dot in a 2-D space. Dropdowns let the

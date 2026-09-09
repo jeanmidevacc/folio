@@ -12,14 +12,14 @@ from __future__ import annotations
 import typing as t
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import BaseBlock, BlockId, _MAX_CAPTION_LEN, _truncate
+from bulletin.blocks.base import Block, BlockId, _MAX_CAPTION_LEN, _truncate
 
 if t.TYPE_CHECKING:
     import pandas as pd
     from pandas.io.formats.style import Styler
 
 
-class Plot(BaseBlock):
+class Plot(Block):
     """Chart / figure block — library agnostic.
 
     Auto-detects the figure type at render time:
@@ -50,7 +50,7 @@ class Plot(BaseBlock):
         self.scale = scale
 
 
-class Table(BaseBlock):
+class Table(Block):
     """Static HTML table rendered from a pandas DataFrame or Styler.
 
     Best for multidimensional DataFrames where you want pandas' Styler
@@ -79,7 +79,7 @@ class Table(BaseBlock):
         self.caption = _truncate(caption, _MAX_CAPTION_LEN) if caption else caption
 
 
-class DataTable(BaseBlock):
+class DataTable(Block):
     """Interactive, sortable and searchable table rendered from a pandas DataFrame.
 
     Handles large datasets via client-side pagination. Viewers can also sort

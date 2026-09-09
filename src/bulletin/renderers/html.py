@@ -23,9 +23,9 @@ from importlib.resources import files
 from jinja2 import Environment, PackageLoader
 
 from bulletin.blocks.asset import DataTable, Plot, Table
-from bulletin.blocks.base import BaseBlock
+from bulletin.blocks.base import Block
 from bulletin.blocks.data import DataDive, DataProfile
-from bulletin.blocks.layout import Blocks, Group, Select, SelectType, Toggle, VAlign
+from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle, VAlign
 from bulletin.blocks.text import Alert, BigNumber, Code, Formula, HTML, Text
 from bulletin.renderers.datadive import render_datadive
 from bulletin.renderers.formatting import Formatting
@@ -254,7 +254,7 @@ def _render_datadive(block: DataDive, _: _IdGen) -> str:
     return render_datadive(block)
 
 
-def _render_placeholder(block: BaseBlock, _: _IdGen) -> str:
+def _render_placeholder(block: Block, _: _IdGen) -> str:
     name = _html.escape(type(block).__name__)
     return (
         f'<div class="bn-block bn-placeholder">'
@@ -283,8 +283,8 @@ _DISPATCH: dict[type, object] = {
 }
 
 
-def _render_block(block: BaseBlock, idgen: _IdGen) -> str:
-    if isinstance(block, Blocks):
+def _render_block(block: Block, idgen: _IdGen) -> str:
+    if isinstance(block, Bulletin):
         inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
         return f'<div class="bn-blocks">{inner}</div>'
 
@@ -299,7 +299,7 @@ def _render_block(block: BaseBlock, idgen: _IdGen) -> str:
 
 
 def render_report(
-    blocks: Blocks,
+    blocks: Bulletin,
     name: str = "Report",
     formatting: Formatting | None = None,
 ) -> str:

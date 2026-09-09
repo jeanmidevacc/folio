@@ -8,13 +8,13 @@ from enum import StrEnum
 from pathlib import Path
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import BaseBlock, BlockId, _MAX_CAPTION_LEN, _truncate
+from bulletin.blocks.base import Block, BlockId, _MAX_CAPTION_LEN, _truncate
 
 
 # ── embedded text base ───────────────────────────────────────────────────────
 
 
-class EmbeddedTextBlock(BaseBlock):
+class EmbeddedTextBlock(Block):
     """Abstract base for blocks whose content is stored as a string directly
     in the document (not as an external asset reference)."""
 
@@ -133,7 +133,7 @@ class Formula(EmbeddedTextBlock):
 # ── KPI / metric blocks ───────────────────────────────────────────────────────
 
 
-class BigNumber(BaseBlock):
+class BigNumber(Block):
     """KPI display block — shows a headline metric with optional change indicator.
 
     Example::
@@ -171,7 +171,7 @@ class AlertLevel(StrEnum):
     ERROR = "error"
 
 
-class Alert(BaseBlock):
+class Alert(Block):
     """Styled callout / alert block.
 
     Example::

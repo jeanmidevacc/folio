@@ -35,19 +35,19 @@ class Formatting:
 
     Quick start — built-in presets::
 
-        fl.save_report(blocks, "dark.html",      formatting=fl.Formatting.dark())
-        fl.save_report(blocks, "corp.html",      formatting=fl.Formatting.corporate())
-        fl.save_report(blocks, "minimal.html",   formatting=fl.Formatting.minimal())
-        fl.save_report(blocks, "ocean.html",     formatting=fl.Formatting.ocean())
+        fl.save(blocks, "dark.html",      formatting=fl.Formatting.dark())
+        fl.save(blocks, "corp.html",      formatting=fl.Formatting.corporate())
+        fl.save(blocks, "minimal.html",   formatting=fl.Formatting.minimal())
+        fl.save(blocks, "ocean.html",     formatting=fl.Formatting.ocean())
 
     Fine-tuning a preset::
 
         fmt = fl.Formatting.dark(accent_color="#f43f5e")
-        fl.save_report(blocks, "out.html", formatting=fmt)
+        fl.save(blocks, "out.html", formatting=fmt)
 
     Building from scratch::
 
-        fl.save_report(
+        fl.save(
             blocks, "out.html",
             formatting=fl.Formatting(
                 accent_color="#0369a1",

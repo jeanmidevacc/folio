@@ -31,7 +31,7 @@ from bulletin._error import BulletinError
 
 if t.TYPE_CHECKING:
     from bulletin.blocks.asset import Plot
-    from bulletin.blocks.base import BaseBlock
+    from bulletin.blocks.base import Block
 
 _SUPPORTED = {"altair", "bokeh", "matplotlib", "plotly"}
 
@@ -62,13 +62,13 @@ def detect_library(fig: t.Any) -> str:
 # ── tree scan (pre-pass) ──────────────────────────────────────────────────────
 
 
-def scan_for_plots(root: BaseBlock) -> set[str]:
+def scan_for_plots(root: Block) -> set[str]:
     """Walk *root* depth-first and return the set of libraries used in Plot blocks."""
     from bulletin.blocks.asset import Plot as PlotBlock
     from bulletin.blocks.base import ContainerBlock
 
     needed: set[str] = set()
-    stack: list[BaseBlock] = [root]
+    stack: list[Block] = [root]
 
     while stack:
         block = stack.pop()

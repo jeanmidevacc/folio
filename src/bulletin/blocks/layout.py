@@ -1,4 +1,4 @@
-"""Layout and container blocks: Group, Select, Toggle, Page, Blocks."""
+"""Layout and container blocks: Group, Select, Toggle, Page, Bulletin."""
 from __future__ import annotations
 
 import typing as t
@@ -6,7 +6,7 @@ import warnings
 from enum import StrEnum
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import BaseBlock, BlockId, BlockOrPrimitive, ContainerBlock
+from bulletin.blocks.base import Block, BlockId, BlockOrPrimitive, ContainerBlock
 
 
 # ── enums ─────────────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ class Page(ContainerBlock):
 
     Example::
 
-        fl.Blocks(
+        fl.Bulletin(
             fl.Page(summary_group, title="Summary"),
             fl.Page(detail_group, title="Detail"),
         )
@@ -148,18 +148,18 @@ class Page(ContainerBlock):
         self.title = title
 
 
-class Blocks(ContainerBlock):
+class Bulletin(ContainerBlock):
     """Root document container.
 
-    This is the top-level object passed to ``save_report`` / ``send_email``.
+    This is the top-level object passed to ``save`` / ``send_email``.
 
     Example::
 
-        report = fl.Blocks(
+        report = fl.Bulletin(
             fl.Text("# My report"),
             fl.Plot(fig),
         )
-        fl.save_report(report, "report.html")
+        fl.save(report, "report.html")
     """
 
     min_blocks: t.ClassVar[int] = 1
@@ -169,23 +169,23 @@ class Blocks(ContainerBlock):
         *arg_blocks: BlockOrPrimitive,
         blocks: list[BlockOrPrimitive] | None = None,
     ) -> None:
-        # Unwrap if a single Blocks is passed directly (avoids double-wrapping).
-        if len(arg_blocks) == 1 and isinstance(arg_blocks[0], Blocks):
+        # Unwrap if a single Bulletin is passed directly (avoids double-wrapping).
+        if len(arg_blocks) == 1 and isinstance(arg_blocks[0], Bulletin):
             arg_blocks = tuple(arg_blocks[0].blocks)
         super().__init__(*arg_blocks, blocks=blocks)
 
     @classmethod
     def wrap(
         cls,
-        x: Blocks | list[BlockOrPrimitive] | BlockOrPrimitive,
-    ) -> Blocks:
-        """Coerce *x* into a ``Blocks`` instance.
+        x: Bulletin | list[BlockOrPrimitive] | BlockOrPrimitive,
+    ) -> Bulletin:
+        """Coerce *x* into a ``Bulletin`` instance.
 
-        - Already a ``Blocks`` → returned unchanged.
-        - A ``list`` → unpacked into ``Blocks(*x)``.
-        - Anything else → wrapped as ``Blocks(x)``.
+        - Already a ``Bulletin`` → returned unchanged.
+        - A ``list`` → unpacked into ``Bulletin(*x)``.
+        - Anything else → wrapped as ``Bulletin(x)``.
         """
-        if isinstance(x, Blocks):
+        if isinstance(x, Bulletin):
             return x
         if isinstance(x, list):
             return cls(*x)
@@ -195,7 +195,7 @@ class Blocks(ContainerBlock):
 # ── public re-exports ─────────────────────────────────────────────────────────
 
 __all__: list[str] = [
-    "Blocks",
+    "Bulletin",
     "Group",
     "Page",
     "Select",

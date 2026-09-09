@@ -1,4 +1,4 @@
-"""Tests for layout blocks: Group, Select, Toggle, Page, Blocks."""
+"""Tests for layout blocks: Group, Select, Toggle, Page, Bulletin."""
 from __future__ import annotations
 
 import warnings
@@ -6,7 +6,7 @@ import warnings
 import pytest
 
 from bulletin._error import BulletinError
-from bulletin.blocks.layout import Blocks, Group, Page, Select, SelectType, Toggle, VAlign
+from bulletin.blocks.layout import Bulletin, Group, Page, Select, SelectType, Toggle, VAlign
 from bulletin.blocks.text import Text
 
 
@@ -163,47 +163,47 @@ class TestPage:
         assert p.name == "page-1"
 
 
-# ── Blocks ────────────────────────────────────────────────────────────────────
+# ── Bulletin ────────────────────────────────────────────────────────────────────
 
 
 class TestBlocks:
     def test_basic(self):
-        b = Blocks(*make_texts(3))
+        b = Bulletin(*make_texts(3))
         assert len(b) == 3
 
     def test_single_blocks_unwrapped(self):
-        inner = Blocks(Text("a"), Text("b"))
-        outer = Blocks(inner)
-        # Passing a single Blocks into Blocks should flatten it.
+        inner = Bulletin(Text("a"), Text("b"))
+        outer = Bulletin(inner)
+        # Passing a single Bulletin into Bulletin should flatten it.
         assert len(outer) == 2
 
     def test_string_auto_wrapped(self):
-        b = Blocks("# Hello", Text("world"))
+        b = Bulletin("# Hello", Text("world"))
         assert len(b) == 2
 
     def test_wrap_from_blocks_instance(self):
-        original = Blocks(*make_texts(2))
-        wrapped = Blocks.wrap(original)
+        original = Bulletin(*make_texts(2))
+        wrapped = Bulletin.wrap(original)
         assert wrapped is original
 
     def test_wrap_from_list(self):
         items = make_texts(3)
-        wrapped = Blocks.wrap(items)
-        assert isinstance(wrapped, Blocks)
+        wrapped = Bulletin.wrap(items)
+        assert isinstance(wrapped, Bulletin)
         assert len(wrapped) == 3
 
     def test_wrap_from_single_block(self):
         t = Text("only")
-        wrapped = Blocks.wrap(t)
-        assert isinstance(wrapped, Blocks)
+        wrapped = Bulletin.wrap(t)
+        assert isinstance(wrapped, Bulletin)
         assert len(wrapped) == 1
 
     def test_blocks_kwarg(self):
         items = make_texts(2)
-        b = Blocks(blocks=items)
+        b = Bulletin(blocks=items)
         assert len(b) == 2
 
     def test_iteration(self):
         items = make_texts(3)
-        b = Blocks(*items)
+        b = Bulletin(*items)
         assert list(b) == items

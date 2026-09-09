@@ -6,7 +6,7 @@ import pytest
 from bs4 import BeautifulSoup
 
 from bulletin.blocks.asset import DataTable, Table
-from bulletin.blocks.layout import Blocks
+from bulletin.blocks.layout import Bulletin
 from bulletin.renderers.html import render_report
 from bulletin.renderers.table import render_datatable, render_table
 
@@ -215,17 +215,17 @@ class TestRenderDataTable:
 
 class TestTableInReport:
     def test_datatable_in_report(self, simple_df):
-        html = render_report(Blocks(DataTable(simple_df)))
+        html = render_report(Bulletin(DataTable(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         assert soup.find("div", class_="bn-datatable") is not None
 
     def test_table_in_report(self, simple_df):
-        html = render_report(Blocks(Table(simple_df)))
+        html = render_report(Bulletin(Table(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         assert soup.find("div", class_="bn-table") is not None
 
     def test_no_external_resources(self, simple_df):
-        html = render_report(Blocks(DataTable(simple_df)))
+        html = render_report(Bulletin(DataTable(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")

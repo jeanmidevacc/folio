@@ -1,4 +1,4 @@
-"""Core block primitives: BaseBlock, ContainerBlock, and wrap_block."""
+"""Core block primitives: Block, ContainerBlock, and wrap_block."""
 from __future__ import annotations
 
 import re
@@ -11,10 +11,10 @@ _MAX_LABEL_LEN = 256
 _MAX_CAPTION_LEN = 512
 
 BlockId = str
-BlockOrPrimitive = t.Union["BaseBlock", t.Any]
+BlockOrPrimitive = t.Union["Block", t.Any]
 
 
-class BaseBlock:
+class Block:
     """Base class for all bulletin blocks.
 
     All blocks carry an optional ``name`` (a stable ID for referencing the
@@ -44,7 +44,7 @@ class BaseBlock:
         return f"{self.__class__.__name__}({', '.join(parts)})"
 
 
-class ContainerBlock(BaseBlock):
+class ContainerBlock(Block):
     """Block that holds a list of child blocks (forms a subtree)."""
 
     #: Subclasses can raise the bar; checked during rendering, not construction.
@@ -59,9 +59,9 @@ class ContainerBlock(BaseBlock):
     ) -> None:
         super().__init__(name=name, label=label)
         resolved = list(blocks if blocks is not None else arg_blocks)
-        self.blocks: list[BaseBlock] = [wrap_block(b) for b in resolved]
+        self.blocks: list[Block] = [wrap_block(b) for b in resolved]
 
-    def __iter__(self) -> t.Iterator[BaseBlock]:
+    def __iter__(self) -> t.Iterator[Block]:
         return iter(self.blocks)
 
     def __len__(self) -> int:
@@ -76,7 +76,7 @@ class ContainerBlock(BaseBlock):
         )
 
 
-def wrap_block(b: BlockOrPrimitive) -> BaseBlock:
+def wrap_block(b: BlockOrPrimitive) -> Block:
     """Auto-wrap primitives into appropriate blocks.
 
     Supported auto-wrapping:
@@ -84,7 +84,7 @@ def wrap_block(b: BlockOrPrimitive) -> BaseBlock:
     - ``pd.DataFrame`` → :class:`~bulletin.blocks.asset.DataTable`  (Phase 4)
     - plot objects     → :class:`~bulletin.blocks.asset.Plot`        (Phase 3)
     """
-    if isinstance(b, BaseBlock):
+    if isinstance(b, Block):
         return b
 
     if isinstance(b, str):

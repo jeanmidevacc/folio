@@ -4,7 +4,7 @@ Quick start::
 
     import bulletin as bn
 
-    report = bn.Blocks(
+    report = bn.Bulletin(
         bn.Text("# My Analysis"),
         bn.Group(
             bn.BigNumber("Accuracy", "92.4%", change="+1.2%", is_upward_change=True),
@@ -17,8 +17,10 @@ Quick start::
         ),
     )
 
-    bn.save_report(report, "analysis.html")
+    bn.save(report, "analysis.html")
 """
+import typing as t
+import warnings
 import webbrowser
 from pathlib import Path
 
@@ -28,9 +30,9 @@ from bulletin._error import BulletinError
 from bulletin.blocks import (
     Alert,
     AlertLevel,
-    BaseBlock,
+    Block,
     BigNumber,
-    Blocks,
+    Bulletin,
     Code,
     DataDive,
     DataProfile,
@@ -59,8 +61,8 @@ from bulletin.renderers.html import render_report
 # ── public API ────────────────────────────────────────────────────────────────
 
 
-def save_report(
-    blocks: Blocks | list | object,
+def save(
+    blocks: Bulletin | list | object,
     path: str,
     *,
     open: bool = False,  # noqa: A002
@@ -70,7 +72,7 @@ def save_report(
     """Save *blocks* as a self-contained HTML file at *path*.
 
     Args:
-        blocks: A :class:`~bulletin.Blocks` instance, a list of blocks, or a
+        blocks: A :class:`~bulletin.Bulletin` instance, a list of blocks, or a
             single block.  Lists and single blocks are automatically wrapped.
         path: Destination file path (e.g. ``"report.html"``).
         open: Open the file in your default browser after saving.
@@ -79,9 +81,9 @@ def save_report(
 
     Example::
 
-        bn.save_report(report, "analysis.html", name="Q1 Analysis", open=True)
+        bn.save(report, "analysis.html", name="Q1 Analysis", open=True)
     """
-    wrapped = Blocks.wrap(blocks)  # type: ignore[arg-type]
+    wrapped = Bulletin.wrap(blocks)  # type: ignore[arg-type]
     html = render_report(wrapped, name=name, formatting=formatting)
     dest = Path(path)
     dest.write_text(html, encoding="utf-8")
@@ -89,8 +91,8 @@ def save_report(
         webbrowser.open(dest.resolve().as_uri())
 
 
-def stringify_report(
-    blocks: Blocks | list | object,
+def stringify(
+    blocks: Bulletin | list | object,
     *,
     name: str = "Report",
     formatting: Formatting | None = None,
@@ -100,9 +102,9 @@ def stringify_report(
     Useful for inline display in Jupyter notebooks::
 
         from IPython.display import HTML, display
-        display(HTML(bn.stringify_report(report)))
+        display(HTML(bn.stringify(report)))
     """
-    wrapped = Blocks.wrap(blocks)  # type: ignore[arg-type]
+    wrapped = Bulletin.wrap(blocks)  # type: ignore[arg-type]
     return render_report(wrapped, name=name, formatting=formatting)
 
 
@@ -120,8 +122,8 @@ __all__: list[str] = [
     "HTML",
     "Text",
     # blocks — layout
-    "BaseBlock",
-    "Blocks",
+    "Block",
+    "Bulletin",
     "Group",
     "Page",
     "Select",
@@ -141,8 +143,32 @@ __all__: list[str] = [
     "TextAlignment",
     "Width",
     # api
-    "save_report",
-    "stringify_report",
+    "save",
+    "stringify",
     # meta
     "__version__",
 ]
+
+
+# ── deprecated aliases (removed after 0.2) ───────────────────────────────────
+
+#: old name -> (new name, object)
+_RENAMED: dict[str, tuple[str, object]] = {
+    "Blocks": ("Bulletin", Bulletin),
+    "BaseBlock": ("Block", Block),
+    "save_report": ("save", save),
+    "stringify_report": ("stringify", stringify),
+}
+
+
+def __getattr__(name: str) -> t.Any:
+    if name in _RENAMED:
+        new, obj = _RENAMED[name]
+        warnings.warn(
+            f"bulletin.{name} is deprecated and will be removed after 0.2 — "
+            f"use bulletin.{new}.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return obj
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

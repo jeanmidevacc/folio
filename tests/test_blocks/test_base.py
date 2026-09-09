@@ -1,16 +1,16 @@
-"""Tests for BaseBlock, ContainerBlock, and wrap_block."""
+"""Tests for Block, ContainerBlock, and wrap_block."""
 from __future__ import annotations
 
 import pytest
 import pandas as pd
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import BaseBlock, ContainerBlock, wrap_block
+from bulletin.blocks.base import Block, ContainerBlock, wrap_block
 from bulletin.blocks.text import Text
 from bulletin.blocks.asset import DataTable
 
 
-# ── BaseBlock ─────────────────────────────────────────────────────────────────
+# ── Block ─────────────────────────────────────────────────────────────────
 
 
 class TestBaseBlock:

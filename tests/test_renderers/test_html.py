@@ -11,7 +11,7 @@ import pytest
 from bs4 import BeautifulSoup
 
 import bulletin as bn
-from bulletin.blocks.layout import Blocks, Group, Select, SelectType, Toggle
+from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle
 from bulletin.blocks.text import Alert, AlertLevel, BigNumber, Code, Formula, HTML, Text
 from bulletin.renderers.formatting import Formatting, Width
 from bulletin.renderers.html import render_report
@@ -24,12 +24,12 @@ def parse(html: str) -> BeautifulSoup:
     return BeautifulSoup(html, "html.parser")
 
 
-def render(blocks: Blocks, **kwargs) -> BeautifulSoup:
+def render(blocks: Bulletin, **kwargs) -> BeautifulSoup:
     return parse(render_report(blocks, **kwargs))
 
 
-def blocks(*args) -> Blocks:
-    return Blocks(*args)
+def blocks(*args) -> Bulletin:
+    return Bulletin(*args)
 
 
 # ── self-contained guarantee ──────────────────────────────────────────────────
@@ -290,42 +290,42 @@ class TestToggleRendering:
 
 class TestPublicAPI:
     def test_save_report_writes_file(self, tmp_path):
-        report = bn.Blocks(bn.Text("# Hello"))
+        report = bn.Bulletin(bn.Text("# Hello"))
         dest = tmp_path / "out.html"
-        bn.save_report(report, str(dest), name="Test")
+        bn.save(report, str(dest), name="Test")
         assert dest.exists()
         assert dest.stat().st_size > 0
         content = dest.read_text(encoding="utf-8")
         assert "<!DOCTYPE html>" in content
 
     def test_save_report_self_contained(self, tmp_path):
-        report = bn.Blocks(bn.Text("hi"))
+        report = bn.Bulletin(bn.Text("hi"))
         dest = tmp_path / "out.html"
-        bn.save_report(report, str(dest))
+        bn.save(report, str(dest))
         soup = parse(dest.read_text(encoding="utf-8"))
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")
 
     def test_stringify_report_returns_string(self):
-        report = bn.Blocks(bn.Text("hello"))
-        result = bn.stringify_report(report)
+        report = bn.Bulletin(bn.Text("hello"))
+        result = bn.stringify(report)
         assert isinstance(result, str)
         assert "<!DOCTYPE html>" in result
 
     def test_save_report_accepts_list(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save_report([bn.Text("a"), bn.Text("b")], str(dest))
+        bn.save([bn.Text("a"), bn.Text("b")], str(dest))
         assert dest.exists()
 
     def test_save_report_accepts_single_block(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save_report(bn.Text("solo"), str(dest))
+        bn.save(bn.Text("solo"), str(dest))
         assert dest.exists()
 
     def test_formatting_applied(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save_report(
-            bn.Blocks(bn.Text("hi")),
+        bn.save(
+            bn.Bulletin(bn.Text("hi")),
             str(dest),
             formatting=bn.Formatting(accent_color="#cafe00"),
         )
@@ -333,8 +333,8 @@ class TestPublicAPI:
 
     def test_width_narrow_in_css(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save_report(
-            bn.Blocks(bn.Text("hi")),
+        bn.save(
+            bn.Bulletin(bn.Text("hi")),
             str(dest),
             formatting=bn.Formatting(width=Width.NARROW),
         )
