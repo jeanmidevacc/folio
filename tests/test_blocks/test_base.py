@@ -1,16 +1,15 @@
-"""Tests for BaseBlock, ContainerBlock, and wrap_block."""
+"""Tests for Block, ContainerBlock, and wrap_block."""
 from __future__ import annotations
 
-import pytest
 import pandas as pd
+import pytest
 
-from folio._error import FolioError
-from folio.blocks.base import BaseBlock, ContainerBlock, wrap_block
-from folio.blocks.text import Text
-from folio.blocks.asset import DataTable
+from bulletin._error import BulletinError
+from bulletin.blocks.asset import DataTable
+from bulletin.blocks.base import ContainerBlock, wrap_block
+from bulletin.blocks.text import Text
 
-
-# ── BaseBlock ─────────────────────────────────────────────────────────────────
+# ── Block ─────────────────────────────────────────────────────────────────
 
 
 class TestBaseBlock:
@@ -39,7 +38,7 @@ class TestBaseBlock:
         ],
     )
     def test_invalid_name_raises(self, bad_name):
-        with pytest.raises(FolioError, match="Invalid block name"):
+        with pytest.raises(BulletinError, match="Invalid block name"):
             Text("hello", name=bad_name)
 
     def test_label_stored_as_is_when_short(self):
@@ -125,9 +124,9 @@ class TestWrapBlock:
         assert isinstance(result, DataTable)
 
     def test_unsupported_type_raises(self):
-        with pytest.raises(FolioError, match="Cannot auto-wrap"):
+        with pytest.raises(BulletinError, match="Cannot auto-wrap"):
             wrap_block(42)
 
     def test_unsupported_type_includes_type_name(self):
-        with pytest.raises(FolioError, match="int"):
+        with pytest.raises(BulletinError, match="int"):
             wrap_block(42)

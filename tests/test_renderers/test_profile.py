@@ -5,16 +5,15 @@ import pandas as pd
 import pytest
 from bs4 import BeautifulSoup
 
-from folio.blocks.data import DataProfile
-from folio.blocks.layout import Blocks
-from folio.renderers.html import render_report
-from folio.renderers.profile import (
+from bulletin.blocks.data import DataProfile
+from bulletin.blocks.layout import Bulletin
+from bulletin.renderers.html import render_report
+from bulletin.renderers.profile import (
     _bar_chart_svg,
     _detect_kind,
     _histogram_svg,
     render_profile,
 )
-
 
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
@@ -124,14 +123,14 @@ class TestRenderProfile:
     def test_outer_div_class(self, numeric_df):
         html = render_profile(DataProfile(numeric_df))
         soup = BeautifulSoup(html, "html.parser")
-        outer = soup.find("div", class_="fl-profile")
+        outer = soup.find("div", class_="bn-profile")
         assert outer is not None
-        assert "fl-block" in outer["class"]
+        assert "bn-block" in outer["class"]
 
     def test_one_card_per_column(self, mixed_df):
         html = render_profile(DataProfile(mixed_df))
         soup = BeautifulSoup(html, "html.parser")
-        cards = soup.find_all("div", class_="fl-profile__card")
+        cards = soup.find_all("div", class_="bn-profile__card")
         assert len(cards) == 3  # n, c, d
 
     def test_column_name_shown(self, numeric_df):
@@ -141,7 +140,7 @@ class TestRenderProfile:
     def test_dtype_badge_present(self, numeric_df):
         html = render_profile(DataProfile(numeric_df))
         soup = BeautifulSoup(html, "html.parser")
-        badges = soup.find_all("span", class_="fl-profile__dtype")
+        badges = soup.find_all("span", class_="bn-profile__dtype")
         assert len(badges) == 1
 
     def test_numeric_stats_present(self, numeric_df):
@@ -172,14 +171,14 @@ class TestRenderProfile:
         df = pd.DataFrame({"x": [None] * 9 + [1.0]})  # 90% missing
         html = render_profile(DataProfile(df, missing_threshold=0.20))
         soup = BeautifulSoup(html, "html.parser")
-        high = soup.find(class_="fl-profile__missing--high")
+        high = soup.find(class_="bn-profile__missing--high")
         assert high is not None
 
     def test_low_missing_not_highlighted(self, numeric_df):
         # numeric_df has 1/6 ≈ 16.7% missing, threshold=0.20 → no highlight
         html = render_profile(DataProfile(numeric_df, missing_threshold=0.20))
         soup = BeautifulSoup(html, "html.parser")
-        high = soup.find(class_="fl-profile__missing--high")
+        high = soup.find(class_="bn-profile__missing--high")
         assert high is None
 
     def test_numeric_chart_svg_present(self, numeric_df):
@@ -204,7 +203,7 @@ class TestRenderProfile:
         html = render_profile(DataProfile(df, max_categories=5))
         soup = BeautifulSoup(html, "html.parser")
         # only 5 values' bars should appear in SVG (SVG rect count = 5)
-        card = soup.find("div", class_="fl-profile__card")
+        card = soup.find("div", class_="bn-profile__card")
         rects = card.find_all("rect")
         assert len(rects) <= 5
 
@@ -220,12 +219,12 @@ class TestRenderProfile:
 
 class TestProfileInReport:
     def test_profile_in_report(self, mixed_df):
-        html = render_report(Blocks(DataProfile(mixed_df)))
+        html = render_report(Bulletin(DataProfile(mixed_df)))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="fl-profile") is not None
+        assert soup.find("div", class_="bn-profile") is not None
 
     def test_self_contained(self, numeric_df):
-        html = render_report(Blocks(DataProfile(numeric_df)))
+        html = render_report(Bulletin(DataProfile(numeric_df)))
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")
@@ -234,5 +233,5 @@ class TestProfileInReport:
 
     def test_empty_df_renders(self):
         df = pd.DataFrame({"a": pd.Series([], dtype=float)})
-        html = render_report(Blocks(DataProfile(df)))
-        assert "fl-profile" in html
+        html = render_report(Bulletin(DataProfile(df)))
+        assert "bn-profile" in html

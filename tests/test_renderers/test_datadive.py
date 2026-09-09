@@ -7,11 +7,10 @@ import pandas as pd
 import pytest
 from bs4 import BeautifulSoup
 
-from folio.blocks.data import DataDive
-from folio.blocks.layout import Blocks
-from folio.renderers.datadive import _col_kind, _pick_defaults, render_datadive
-from folio.renderers.html import render_report
-
+from bulletin.blocks.data import DataDive
+from bulletin.blocks.layout import Bulletin
+from bulletin.renderers.datadive import _col_kind, _pick_defaults, render_datadive
+from bulletin.renderers.html import render_report
 
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
@@ -69,30 +68,30 @@ class TestRenderDataDive:
     def test_returns_datadive_div(self, simple_df):
         html = render_datadive(DataDive(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="fl-datadive") is not None
+        assert soup.find("div", class_="bn-datadive") is not None
 
     def test_fl_block_class(self, simple_df):
         html = render_datadive(DataDive(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        outer = soup.find("div", class_="fl-datadive")
-        assert "fl-block" in outer["class"]
+        outer = soup.find("div", class_="bn-datadive")
+        assert "bn-block" in outer["class"]
 
     def test_controls_present(self, simple_df):
         html = render_datadive(DataDive(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="fl-dd__controls") is not None
-        selects = soup.find_all("select", class_="fl-dd__sel")
+        assert soup.find("div", class_="bn-dd__controls") is not None
+        selects = soup.find_all("select", class_="bn-dd__sel")
         assert len(selects) >= 2  # at minimum X and Y
 
     def test_svg_present(self, simple_df):
         html = render_datadive(DataDive(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("svg", class_="fl-dd__plot") is not None
+        assert soup.find("svg", class_="bn-dd__plot") is not None
 
     def test_data_json_embedded(self, simple_df):
         html = render_datadive(DataDive(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        data_el = soup.find("script", class_="fl-dd__data")
+        data_el = soup.find("script", class_="bn-dd__data")
         assert data_el is not None
         records = json.loads(data_el.string)
         assert len(records) == 3
@@ -100,7 +99,7 @@ class TestRenderDataDive:
     def test_meta_json_embedded(self, simple_df):
         html = render_datadive(DataDive(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        meta_el = soup.find("script", class_="fl-dd__meta")
+        meta_el = soup.find("script", class_="bn-dd__meta")
         assert meta_el is not None
         meta = json.loads(meta_el.string)
         assert meta["x"] == "numeric"
@@ -136,7 +135,7 @@ class TestRenderDataDive:
         df = pd.DataFrame({"a": [1.0, float("nan"), 3.0], "b": [4.0, 5.0, 6.0]})
         html = render_datadive(DataDive(df))
         soup = BeautifulSoup(html, "html.parser")
-        records = json.loads(soup.find("script", class_="fl-dd__data").string)
+        records = json.loads(soup.find("script", class_="bn-dd__data").string)
         assert records[1]["a"] is None
 
     def test_datetime_serialised_as_string(self):
@@ -146,7 +145,7 @@ class TestRenderDataDive:
         })
         html = render_datadive(DataDive(df))
         soup = BeautifulSoup(html, "html.parser")
-        records = json.loads(soup.find("script", class_="fl-dd__data").string)
+        records = json.loads(soup.find("script", class_="bn-dd__data").string)
         assert isinstance(records[0]["ts"], str)
 
     def test_no_external_resources(self, simple_df):
@@ -161,7 +160,7 @@ class TestRenderDataDive:
         # The raw <script> tag from column name should NOT appear as HTML
         # (it would be escaped in option text/values)
         soup = BeautifulSoup(html, "html.parser")
-        scripts = [s for s in soup.find_all("script") if s.get("class") not in [["fl-dd__data"], ["fl-dd__meta"]]]
+        scripts = [s for s in soup.find_all("script") if s.get("class") not in [["bn-dd__data"], ["bn-dd__meta"]]]
         # No extra injected script tags
         assert len(scripts) == 0
 
@@ -171,7 +170,7 @@ class TestRenderDataDive:
             block = DataDive(big, max_rows=50)
         html = render_datadive(block)
         soup = BeautifulSoup(html, "html.parser")
-        records = json.loads(soup.find("script", class_="fl-dd__data").string)
+        records = json.loads(soup.find("script", class_="bn-dd__data").string)
         assert len(records) == 50
 
 
@@ -180,12 +179,12 @@ class TestRenderDataDive:
 
 class TestDataDiveInReport:
     def test_datadive_in_report(self, simple_df):
-        html = render_report(Blocks(DataDive(simple_df)))
+        html = render_report(Bulletin(DataDive(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="fl-datadive") is not None
+        assert soup.find("div", class_="bn-datadive") is not None
 
     def test_self_contained(self, simple_df):
-        html = render_report(Blocks(DataDive(simple_df)))
+        html = render_report(Bulletin(DataDive(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")

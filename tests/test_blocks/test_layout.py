@@ -1,14 +1,13 @@
-"""Tests for layout blocks: Group, Select, Toggle, Page, Blocks."""
+"""Tests for layout blocks: Group, Select, Toggle, Page, Bulletin."""
 from __future__ import annotations
 
 import warnings
 
 import pytest
 
-from folio._error import FolioError
-from folio.blocks.layout import Blocks, Group, Page, Select, SelectType, Toggle, VAlign
-from folio.blocks.text import Text
-
+from bulletin._error import BulletinError
+from bulletin.blocks.layout import Bulletin, Group, Page, Select, SelectType, Toggle, VAlign
+from bulletin.blocks.text import Text
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -40,7 +39,7 @@ class TestGroup:
         assert g.widths == [2, 1]
 
     def test_widths_wrong_length_raises(self):
-        with pytest.raises(FolioError, match="widths"):
+        with pytest.raises(BulletinError, match="widths"):
             Group(*make_texts(2), columns=2, widths=[1, 2, 3])
 
     def test_valign_default(self):
@@ -63,7 +62,7 @@ class TestGroup:
         g = Group("# Title", Text("body"), columns=2)
         assert len(g) == 2
         # The string should be wrapped into a Text block
-        from folio.blocks.text import Text as T
+        from bulletin.blocks.text import Text as T
         assert isinstance(g.blocks[0], T)
 
     def test_name_and_label(self):
@@ -150,7 +149,7 @@ class TestPage:
         assert p.label is None
 
     def test_nested_page_raises(self):
-        with pytest.raises(FolioError, match="Nested Page"):
+        with pytest.raises(BulletinError, match="Nested Page"):
             Page(Page(Text("inner")))
 
     def test_blocks_kwarg(self):
@@ -163,47 +162,47 @@ class TestPage:
         assert p.name == "page-1"
 
 
-# ── Blocks ────────────────────────────────────────────────────────────────────
+# ── Bulletin ────────────────────────────────────────────────────────────────────
 
 
 class TestBlocks:
     def test_basic(self):
-        b = Blocks(*make_texts(3))
+        b = Bulletin(*make_texts(3))
         assert len(b) == 3
 
     def test_single_blocks_unwrapped(self):
-        inner = Blocks(Text("a"), Text("b"))
-        outer = Blocks(inner)
-        # Passing a single Blocks into Blocks should flatten it.
+        inner = Bulletin(Text("a"), Text("b"))
+        outer = Bulletin(inner)
+        # Passing a single Bulletin into Bulletin should flatten it.
         assert len(outer) == 2
 
     def test_string_auto_wrapped(self):
-        b = Blocks("# Hello", Text("world"))
+        b = Bulletin("# Hello", Text("world"))
         assert len(b) == 2
 
     def test_wrap_from_blocks_instance(self):
-        original = Blocks(*make_texts(2))
-        wrapped = Blocks.wrap(original)
+        original = Bulletin(*make_texts(2))
+        wrapped = Bulletin.wrap(original)
         assert wrapped is original
 
     def test_wrap_from_list(self):
         items = make_texts(3)
-        wrapped = Blocks.wrap(items)
-        assert isinstance(wrapped, Blocks)
+        wrapped = Bulletin.wrap(items)
+        assert isinstance(wrapped, Bulletin)
         assert len(wrapped) == 3
 
     def test_wrap_from_single_block(self):
         t = Text("only")
-        wrapped = Blocks.wrap(t)
-        assert isinstance(wrapped, Blocks)
+        wrapped = Bulletin.wrap(t)
+        assert isinstance(wrapped, Bulletin)
         assert len(wrapped) == 1
 
     def test_blocks_kwarg(self):
         items = make_texts(2)
-        b = Blocks(blocks=items)
+        b = Bulletin(blocks=items)
         assert len(b) == 2
 
     def test_iteration(self):
         items = make_texts(3)
-        b = Blocks(*items)
+        b = Bulletin(*items)
         assert list(b) == items

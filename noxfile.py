@@ -1,0 +1,37 @@
+"""Developer tasks: `nox -s tests lint typecheck` (or just `nox`)."""
+from __future__ import annotations
+
+import nox
+
+nox.options.sessions = ["tests", "lint", "typecheck"]
+nox.options.reuse_existing_virtualenvs = True
+
+PYTHONS = ["3.11", "3.12", "3.13"]
+
+
+@nox.session(python=PYTHONS)
+def tests(session: nox.Session) -> None:
+    """Run the test suite with coverage."""
+    session.install("-e", ".[dev]")
+    session.run("pytest", *session.posargs)
+
+
+@nox.session(python="3.11")
+def lint(session: nox.Session) -> None:
+    """Ruff lint (no autofix)."""
+    session.install("ruff>=0.4")
+    session.run("ruff", "check", "src", "tests")
+
+
+@nox.session(python="3.11")
+def typecheck(session: nox.Session) -> None:
+    """Strict mypy over the package and the tests."""
+    session.install("-e", ".[dev]")
+    session.run("mypy", "src/bulletin", "tests")
+
+
+@nox.session(python="3.11")
+def demo(session: nox.Session) -> None:
+    """Regenerate the demo reports in ../demo/."""
+    session.install("-e", ".[dev]", "plotly", "matplotlib")
+    session.run("python", "../demo/generate.py", external=True)

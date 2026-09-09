@@ -1,9 +1,8 @@
-"""Shared pytest fixtures for the folio test suite."""
+"""Shared pytest fixtures for the bulletin test suite."""
 from __future__ import annotations
 
-import pytest
 import pandas as pd
-
+import pytest
 
 # ── DataFrame fixtures ────────────────────────────────────────────────────────
 
