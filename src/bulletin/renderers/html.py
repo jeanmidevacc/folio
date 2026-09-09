@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import html as _html
 import itertools
+import os
 from datetime import datetime, timezone
 from importlib.resources import files
 
@@ -298,12 +299,33 @@ def _render_block(block: Block, idgen: _IdGen) -> str:
 # ── public API ────────────────────────────────────────────────────────────────
 
 
+def _resolve_now(now: datetime | None) -> datetime:
+    """Timestamp for the report header.
+
+    Precedence: explicit *now* argument, then the ``SOURCE_DATE_EPOCH``
+    environment variable (the reproducible-builds standard), then the wall
+    clock. The first two make :func:`render_report` output byte-stable, which
+    snapshot tests and "did the agent change anything" diffs rely on.
+    """
+    if now is not None:
+        return now
+    epoch = os.environ.get("SOURCE_DATE_EPOCH")
+    if epoch:
+        return datetime.fromtimestamp(int(epoch), tz=timezone.utc)
+    return datetime.now(tz=timezone.utc)
+
+
 def render_report(
     blocks: Bulletin,
     name: str = "Report",
     formatting: Formatting | None = None,
+    now: datetime | None = None,
 ) -> str:
-    """Render *blocks* to a fully self-contained HTML string."""
+    """Render *blocks* to a fully self-contained HTML string.
+
+    Pass *now* (or set ``SOURCE_DATE_EPOCH``) to pin the header timestamp and
+    get byte-identical output for identical input.
+    """
     fmt = formatting or Formatting()
     normalised = normalize(blocks)
 
@@ -314,7 +336,7 @@ def render_report(
     idgen = _IdGen()
     content_html = _render_block(normalised, idgen)
 
-    now = datetime.now(tz=timezone.utc)
+    now = _resolve_now(now)
     template = _jinja_env.get_template("report.html.j2")
 
     return template.render(

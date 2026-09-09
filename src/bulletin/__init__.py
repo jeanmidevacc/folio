@@ -22,6 +22,7 @@ Quick start::
 import typing as t
 import warnings
 import webbrowser
+from datetime import datetime
 from pathlib import Path
 
 from bulletin._error import BulletinError
@@ -68,6 +69,7 @@ def save(
     open: bool = False,  # noqa: A002
     name: str = "Report",
     formatting: Formatting | None = None,
+    now: datetime | None = None,
 ) -> None:
     """Save *blocks* as a self-contained HTML file at *path*.
 
@@ -78,13 +80,15 @@ def save(
         open: Open the file in your default browser after saving.
         name: Document title shown in the browser tab and report header.
         formatting: A :class:`~bulletin.Formatting` instance controlling the theme.
+        now: Pin the header timestamp for byte-reproducible output (see also the
+            ``SOURCE_DATE_EPOCH`` environment variable).
 
     Example::
 
         bn.save(report, "analysis.html", name="Q1 Analysis", open=True)
     """
     wrapped = Bulletin.wrap(blocks)  # type: ignore[arg-type]
-    html = render_report(wrapped, name=name, formatting=formatting)
+    html = render_report(wrapped, name=name, formatting=formatting, now=now)
     dest = Path(path)
     dest.write_text(html, encoding="utf-8")
     if open:
@@ -96,6 +100,7 @@ def stringify(
     *,
     name: str = "Report",
     formatting: Formatting | None = None,
+    now: datetime | None = None,
 ) -> str:
     """Render *blocks* to a self-contained HTML string.
 
@@ -103,9 +108,11 @@ def stringify(
 
         from IPython.display import HTML, display
         display(HTML(bn.stringify(report)))
+
+    Pass *now* (or set ``SOURCE_DATE_EPOCH``) for byte-reproducible output.
     """
     wrapped = Bulletin.wrap(blocks)  # type: ignore[arg-type]
-    return render_report(wrapped, name=name, formatting=formatting)
+    return render_report(wrapped, name=name, formatting=formatting, now=now)
 
 
 __version__ = "0.1.0"
