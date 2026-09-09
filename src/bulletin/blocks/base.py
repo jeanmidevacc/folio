@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 import typing as t
+from collections.abc import Sequence
 
 from bulletin._error import BulletinError
 
@@ -53,7 +54,7 @@ class ContainerBlock(Block):
     def __init__(
         self,
         *arg_blocks: BlockOrPrimitive,
-        blocks: list[BlockOrPrimitive] | None = None,
+        blocks: Sequence[BlockOrPrimitive] | None = None,
         name: BlockId | None = None,
         label: str | None = None,
     ) -> None:

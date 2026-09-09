@@ -21,6 +21,7 @@ Library support summary
 from __future__ import annotations
 
 import base64
+import contextlib
 import html as _html
 import io
 import re
@@ -73,10 +74,9 @@ def scan_for_plots(root: Block) -> set[str]:
     while stack:
         block = stack.pop()
         if isinstance(block, PlotBlock):
-            try:
+            # An unknown figure type is surfaced properly at render time.
+            with contextlib.suppress(BulletinError):
                 needed.add(detect_library(block.figure))
-            except BulletinError:
-                pass  # surface the error properly at render time
         if isinstance(block, ContainerBlock):
             stack.extend(block.blocks)
 
@@ -142,11 +142,13 @@ def _render_plotly(fig: t.Any, responsive: bool) -> str:
     except ImportError as exc:
         raise BulletinError("plotly is not installed. Run: pip install plotly") from exc
 
-    return pio.to_html(
-        fig,
-        full_html=False,
-        include_plotlyjs=False,   # already embedded in <head> via get_runtime_scripts()
-        config={"responsive": responsive},
+    return str(
+        pio.to_html(
+            fig,
+            full_html=False,
+            include_plotlyjs=False,  # already embedded in <head> via get_runtime_scripts()
+            config={"responsive": responsive},
+        )
     )
 
 
@@ -165,10 +167,8 @@ def _render_altair(fig: t.Any, responsive: bool) -> str:
     )
 
     if responsive:
-        try:
+        with contextlib.suppress(Exception):
             fig = fig.properties(width="container")
-        except Exception:
-            pass
 
     chart_html = fig.to_html()
     b64 = base64.b64encode(chart_html.encode("utf-8")).decode("ascii")

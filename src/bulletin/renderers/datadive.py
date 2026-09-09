@@ -40,10 +40,16 @@ def _col_kind(series: t.Any) -> str:
 # ── default axis selection ────────────────────────────────────────────────────
 
 
-def _pick_defaults(df: t.Any, x_hint: str | None, y_hint: str | None, color_hint: str | None) -> tuple[str, str, str]:
+def _pick_defaults(
+    df: t.Any, x_hint: str | None, y_hint: str | None, color_hint: str | None
+) -> tuple[str, str, str]:
     import pandas as pd
 
-    numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c]) and not pd.api.types.is_bool_dtype(df[c])]
+    def _is_number(col: t.Any) -> bool:
+        s = df[col]
+        return pd.api.types.is_numeric_dtype(s) and not pd.api.types.is_bool_dtype(s)
+
+    numeric_cols = [c for c in df.columns if _is_number(c)]
     other_cols = [c for c in df.columns if c not in numeric_cols]
     all_cols = list(df.columns)
 
@@ -69,7 +75,7 @@ def _serialise(df: t.Any) -> str:
         if out[col].dtype == object:
             out[col] = out[col].apply(lambda v: str(v)[:64] if isinstance(v, str) else v)
 
-    return out.to_json(orient="records", date_format="iso", default_handler=str)
+    return str(out.to_json(orient="records", date_format="iso", default_handler=str))
 
 
 # ── public entry ──────────────────────────────────────────────────────────────
@@ -98,32 +104,35 @@ def render_datadive(block: DataDive) -> str:
 
     def _options_required(selected: str) -> str:
         return "".join(
-            f'<option value="{_html.escape(col)}"{"  selected" if col == selected else ""}>{_html.escape(col)}</option>'
+            f'<option value="{_html.escape(col)}"'
+            f'{" selected" if col == selected else ""}>{_html.escape(col)}</option>'
             for col in cols
         )
 
+    def _control(axis: str, label: str, option_html: str) -> str:
+        return (
+            f'<label class="bn-dd__ctrl">{label}'
+            f'<select class="bn-dd__sel" data-axis="{axis}">{option_html}</select>'
+            f"</label>"
+        )
+
     layout = block.layout  # "scatter" or "tile"
+    none_option = '<option value="">— none —</option>'
 
-    # In tile mode, Y is optional (can group by X only)
-    y_label = "Y" if layout == "scatter" else "Row"
-    x_label = "X" if layout == "scatter" else "Column"
-
-    # Build the Y-axis <option> list separately: in tile mode Y is optional, so it
-    # gets a leading "— none —" entry. (Kept out of the f-string below so the
-    # source stays valid on Python 3.11, which forbids backslashes in f-string
-    # expressions.)
-    y_none_option = '<option value="">— none —</option>' if layout != "scatter" else ""
-    y_options = _options_required(y_def) if layout == "scatter" else _options(y_def)
+    # In tile mode, Y is optional (group by X only) and gets a "— none —" entry.
+    if layout == "scatter":
+        y_label, x_label = "Y", "X"
+        y_option_html = _options_required(y_def)
+    else:
+        y_label, x_label = "Row", "Column"
+        y_option_html = none_option + _options(y_def)
 
     controls = (
-        f'<div class="bn-dd__controls">'
-        f'<label class="bn-dd__ctrl">{x_label}<select class="bn-dd__sel" data-axis="x">{_options_required(x_def)}</select></label>'
-        f'<label class="bn-dd__ctrl">{y_label}<select class="bn-dd__sel" data-axis="y">'
-        f'{y_none_option}'
-        f'{y_options}'
-        f'</select></label>'
-        f'<label class="bn-dd__ctrl">Color<select class="bn-dd__sel" data-axis="color"><option value="">— none —</option>{_options(color_def)}</select></label>'
-        f"</div>"
+        '<div class="bn-dd__controls">'
+        + _control("x", x_label, _options_required(x_def))
+        + _control("y", y_label, y_option_html)
+        + _control("color", "Color", none_option + _options(color_def))
+        + "</div>"
     )
 
     data_json = _serialise(df)

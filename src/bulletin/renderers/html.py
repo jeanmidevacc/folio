@@ -18,6 +18,8 @@ from __future__ import annotations
 import html as _html
 import itertools
 import os
+import typing as t
+from collections.abc import Callable
 from datetime import UTC, datetime
 from importlib.resources import files
 
@@ -266,7 +268,9 @@ def _render_placeholder(block: Block, _: _IdGen) -> str:
 
 # ── dispatcher ────────────────────────────────────────────────────────────────
 
-_DISPATCH: dict[type, object] = {
+_Renderer = Callable[[t.Any, _IdGen], str]
+
+_DISPATCH: dict[type[Block], _Renderer] = {
     Text: _render_text,
     HTML: _render_html,
     Code: _render_code,
@@ -291,7 +295,7 @@ def _render_block(block: Block, idgen: _IdGen) -> str:
 
     renderer = _DISPATCH.get(type(block))
     if renderer is not None:
-        return renderer(block, idgen)  # type: ignore[call-arg]
+        return renderer(block, idgen)
 
     return _render_placeholder(block, idgen)
 

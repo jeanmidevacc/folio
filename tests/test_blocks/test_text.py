@@ -192,7 +192,7 @@ class TestAlert:
 
     def test_invalid_level_raises(self):
         with pytest.raises(ValueError):
-            Alert("msg", level="critical")  # type: ignore[arg-type]
+            Alert("msg", level="critical")
 
     def test_title_stored(self):
         b = Alert("msg", title="Heads up")

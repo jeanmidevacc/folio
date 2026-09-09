@@ -41,11 +41,12 @@ def normalize(blocks: Bulletin) -> Bulletin:
         )
 
     if all(has_pages):
+        pages = [b for b in root.blocks if isinstance(b, Page)]
         root.blocks = [
             Select(
                 blocks=[
                     Group(blocks=page.blocks, label=page.title, name=page.name)
-                    for page in root.blocks  # type: ignore[union-attr]
+                    for page in pages
                 ],
                 type=SelectType.TABS,
             )

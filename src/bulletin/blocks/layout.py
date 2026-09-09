@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import typing as t
 import warnings
+from collections.abc import Sequence
 from enum import StrEnum
 
 from bulletin._error import BulletinError
@@ -42,7 +43,7 @@ class Group(ContainerBlock):
     def __init__(
         self,
         *arg_blocks: BlockOrPrimitive,
-        blocks: list[BlockOrPrimitive] | None = None,
+        blocks: Sequence[BlockOrPrimitive] | None = None,
         columns: int = 1,
         widths: list[int | float] | None = None,
         valign: VAlign | str = VAlign.TOP,
@@ -79,7 +80,7 @@ class Select(ContainerBlock):
     def __init__(
         self,
         *arg_blocks: BlockOrPrimitive,
-        blocks: list[BlockOrPrimitive] | None = None,
+        blocks: Sequence[BlockOrPrimitive] | None = None,
         type: SelectType | str = SelectType.TABS,  # noqa: A002
         name: BlockId | None = None,
         label: str | None = None,
@@ -106,7 +107,7 @@ class Toggle(ContainerBlock):
     def __init__(
         self,
         *arg_blocks: BlockOrPrimitive,
-        blocks: list[BlockOrPrimitive] | None = None,
+        blocks: Sequence[BlockOrPrimitive] | None = None,
         name: BlockId | None = None,
         label: str | None = None,
     ) -> None:
@@ -135,7 +136,7 @@ class Page(ContainerBlock):
     def __init__(
         self,
         *arg_blocks: BlockOrPrimitive,
-        blocks: list[BlockOrPrimitive] | None = None,
+        blocks: Sequence[BlockOrPrimitive] | None = None,
         title: str | None = None,
         name: BlockId | None = None,
     ) -> None:
@@ -166,7 +167,7 @@ class Bulletin(ContainerBlock):
     def __init__(
         self,
         *arg_blocks: BlockOrPrimitive,
-        blocks: list[BlockOrPrimitive] | None = None,
+        blocks: Sequence[BlockOrPrimitive] | None = None,
     ) -> None:
         # Unwrap if a single Bulletin is passed directly (avoids double-wrapping).
         if len(arg_blocks) == 1 and isinstance(arg_blocks[0], Bulletin):

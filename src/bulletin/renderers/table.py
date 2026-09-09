@@ -59,10 +59,11 @@ def _use_index(df: t.Any) -> bool:
 def render_table(block: Table) -> str:
     """Render a :class:`~bulletin.Table` block to a static HTML table fragment."""
     try:
-        import pandas as pd
         from pandas.io.formats.style import Styler
     except ImportError as exc:
-        raise BulletinError("Table requires pandas — install it with: pip install pandas") from exc
+        raise BulletinError(
+            "Table requires pandas — install it with:  pip install bulletin[pandas]"
+        ) from exc
 
     data = block.data
 
@@ -120,7 +121,7 @@ def render_datatable(block: DataTable) -> str:
 
     # ── rows ──
     rows_html = ""
-    for idx_val, row in zip(df.index, df.itertuples(index=False)):
+    for idx_val, row in zip(df.index, df.itertuples(index=False), strict=True):
         cells = ""
         if show_index:
             cells += f"<td>{_html.escape(_fmt(idx_val))}</td>"

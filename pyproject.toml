@@ -63,14 +63,31 @@ omit = ["*/tests/*"]
 
 [tool.ruff]
 target-version = "py311"
-line-length = 100
+# The renderers build HTML as aligned multi-line f-strings; 120 keeps those
+# readable without a wholesale reformat.
+line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests intentionally poke deprecated / dynamic attributes.
+"tests/**" = ["B018"]
 
 [tool.mypy]
 python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+# Optional plotting / markdown libraries ship no type information.
+[[tool.mypy.overrides]]
+module = ["plotly.*", "altair.*", "bokeh.*", "markdown_it.*", "bs4.*"]
+ignore_missing_imports = true
+
+# Tests: still type-checked, but pytest functions need not be annotated.
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false

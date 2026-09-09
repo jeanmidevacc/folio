@@ -38,6 +38,7 @@ class TestNormalize:
         )
         result = normalize(root)
         select = result.blocks[0]
+        assert isinstance(select, Select)
         assert len(select.blocks) == 2
         assert all(isinstance(b, Group) for b in select.blocks)
 
@@ -48,6 +49,7 @@ class TestNormalize:
         )
         result = normalize(root)
         select = result.blocks[0]
+        assert isinstance(select, Select)
         assert select.blocks[0].label == "Overview"
         assert select.blocks[1].label == "Detail"
 
@@ -58,6 +60,7 @@ class TestNormalize:
         )
         result = normalize(root)
         select = result.blocks[0]
+        assert isinstance(select, Select)
         assert select.blocks[0].name == "page-a"
 
     def test_mixed_pages_and_blocks_raises(self):

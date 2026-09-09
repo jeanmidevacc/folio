@@ -64,6 +64,7 @@ def _pct(num: int, denom: int) -> str:
 _SVG_W = 200
 _SVG_H = 52
 _HIST_BINS = 20
+_BAR_FILL = 'fill="var(--bn-accent)" fill-opacity="0.65"'
 
 
 def _histogram_svg(series: t.Any) -> str:
@@ -95,7 +96,7 @@ def _histogram_svg(series: t.Any) -> str:
         x = i * bar_w + gap / 2
         y = _SVG_H - h
         w = bar_w - gap
-        bars += f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" fill="var(--bn-accent)" fill-opacity="0.65"/>'
+        bars += f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" {_BAR_FILL}/>'
 
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_SVG_W} {_SVG_H}">{bars}</svg>'
 
@@ -109,14 +110,14 @@ def _bar_chart_svg(top_values: list[tuple[str, int]]) -> str:
     max_count = max(c for _, c in top_values)
     row_h = _SVG_H / n
     gap = max(0.5, row_h * 0.15)
-    label_w = 0  # no text labels in SVG — rely on tooltip / stats section
+    # No text labels in the SVG — the stats list / tooltip carry the names.
 
     bars = ""
     for i, (_, count) in enumerate(top_values):
         bw = (count / max_count) * (_SVG_W - 2) if max_count else 0
         y = i * row_h + gap / 2
         h = row_h - gap
-        bars += f'<rect x="1" y="{y:.2f}" width="{bw:.2f}" height="{h:.2f}" fill="var(--bn-accent)" fill-opacity="0.65"/>'
+        bars += f'<rect x="1" y="{y:.2f}" width="{bw:.2f}" height="{h:.2f}" {_BAR_FILL}/>'
 
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_SVG_W} {_SVG_H}">{bars}</svg>'
 
@@ -187,7 +188,7 @@ def _column_card(
     elif kind == "categorical":
         unique = int(series.nunique(dropna=True))
         vc = series.value_counts(dropna=True).head(max_categories)
-        top = [(str(k), int(v)) for k, v in zip(vc.index, vc.values)]
+        top = [(str(k), int(v)) for k, v in zip(vc.index, vc.values, strict=True)]
         stat_rows += [("unique", f"{unique:,}")]
         # Top values listed compactly
         top_str = ", ".join(f"{_html.escape(label)} ({cnt:,})" for label, cnt in top[:5])

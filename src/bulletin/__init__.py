@@ -62,7 +62,7 @@ from bulletin.renderers.html import render_report
 
 
 def save(
-    blocks: Bulletin | list | object,
+    blocks: Bulletin | list[t.Any] | object,
     path: str,
     *,
     open: bool = False,  # noqa: A002
@@ -86,7 +86,7 @@ def save(
 
         bn.save(report, "analysis.html", name="Q1 Analysis", open=True)
     """
-    wrapped = Bulletin.wrap(blocks)  # type: ignore[arg-type]
+    wrapped = Bulletin.wrap(blocks)
     html = render_report(wrapped, name=name, formatting=formatting, now=now)
     dest = Path(path)
     dest.write_text(html, encoding="utf-8")
@@ -95,7 +95,7 @@ def save(
 
 
 def stringify(
-    blocks: Bulletin | list | object,
+    blocks: Bulletin | list[t.Any] | object,
     *,
     name: str = "Report",
     formatting: Formatting | None = None,
@@ -110,7 +110,7 @@ def stringify(
 
     Pass *now* (or set ``SOURCE_DATE_EPOCH``) for byte-reproducible output.
     """
-    wrapped = Bulletin.wrap(blocks)  # type: ignore[arg-type]
+    wrapped = Bulletin.wrap(blocks)
     return render_report(wrapped, name=name, formatting=formatting, now=now)
 
 

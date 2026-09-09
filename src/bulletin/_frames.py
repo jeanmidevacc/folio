@@ -21,6 +21,7 @@ that rewrite.
 """
 from __future__ import annotations
 
+import contextlib
 import typing as t
 
 from bulletin._error import BulletinError
@@ -33,13 +34,13 @@ _INSTALL_HINT = "install it with:  pip install bulletin[pandas]"
 
 def _import_pandas() -> t.Any:
     try:
-        import pandas as pd
+        import pandas
     except ImportError as exc:  # pragma: no cover - exercised only without pandas
         raise BulletinError(f"This block needs pandas — {_INSTALL_HINT}") from exc
-    return pd
+    return pandas
 
 
-def is_pandas_dataframe(obj: t.Any) -> bool:
+def is_pandas_dataframe(obj: object) -> bool:
     """True if *obj* is a pandas DataFrame, without importing pandas eagerly."""
     return any(
         f"{c.__module__}.{c.__qualname__}" == "pandas.core.frame.DataFrame"
@@ -47,7 +48,7 @@ def is_pandas_dataframe(obj: t.Any) -> bool:
     )
 
 
-def looks_like_dataframe(obj: t.Any) -> bool:
+def looks_like_dataframe(obj: object) -> bool:
     """Heuristic for auto-wrapping: does *obj* look like a tabular frame?"""
     return (
         is_pandas_dataframe(obj)
@@ -56,7 +57,7 @@ def looks_like_dataframe(obj: t.Any) -> bool:
     )
 
 
-def to_pandas(obj: t.Any, *, block: str = "This block") -> pd.DataFrame:
+def to_pandas(obj: object, *, block: str = "This block") -> pd.DataFrame:
     """Return *obj* as a pandas DataFrame, converting from other libraries.
 
     Args:
@@ -64,17 +65,15 @@ def to_pandas(obj: t.Any, *, block: str = "This block") -> pd.DataFrame:
             something the ``pandas.DataFrame`` constructor accepts.
         block: name used in error messages (e.g. ``"DataTable"``).
     """
-    pd = _import_pandas()
+    pandas = _import_pandas()
 
-    if isinstance(obj, pd.DataFrame):
-        return obj
+    if isinstance(obj, pandas.DataFrame):
+        return t.cast("pd.DataFrame", obj)
 
     # Dataframe interchange protocol — polars, pyarrow, modin, cuDF, vaex, …
     if hasattr(obj, "__dataframe__"):
-        try:
-            return pd.api.interchange.from_dataframe(obj)
-        except Exception:  # noqa: BLE001 - fall through to the next strategy
-            pass
+        with contextlib.suppress(Exception):
+            return t.cast("pd.DataFrame", pandas.api.interchange.from_dataframe(obj))
 
     # pyarrow.Table, polars.DataFrame, …
     to_pd = getattr(obj, "to_pandas", None)
@@ -83,7 +82,7 @@ def to_pandas(obj: t.Any, *, block: str = "This block") -> pd.DataFrame:
 
     # dict of columns / list of row dicts / numpy structured array …
     if isinstance(obj, dict | list):
-        return pd.DataFrame(obj)
+        return t.cast("pd.DataFrame", pandas.DataFrame(obj))
 
     raise BulletinError(
         f"{block} could not turn {type(obj).__module__}.{type(obj).__qualname__} "
