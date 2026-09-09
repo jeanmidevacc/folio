@@ -29,10 +29,11 @@ from bulletin._error import BulletinError
 
 # ── blocks ────────────────────────────────────────────────────────────────────
 from bulletin.blocks import (
+    HTML,
     Alert,
     AlertLevel,
-    Block,
     BigNumber,
+    Block,
     Bulletin,
     Code,
     DataDive,
@@ -40,7 +41,6 @@ from bulletin.blocks import (
     DataTable,
     Formula,
     Group,
-    HTML,
     Page,
     Plot,
     Select,
@@ -57,7 +57,6 @@ from bulletin.renderers.formatting import Formatting, TextAlignment, Width
 
 # ── renderer ──────────────────────────────────────────────────────────────────
 from bulletin.renderers.html import render_report
-
 
 # ── public API ────────────────────────────────────────────────────────────────
 

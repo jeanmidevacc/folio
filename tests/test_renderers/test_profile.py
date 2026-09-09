@@ -15,7 +15,6 @@ from bulletin.renderers.profile import (
     render_profile,
 )
 
-
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
 

@@ -12,7 +12,6 @@ from bulletin.blocks.layout import Bulletin
 from bulletin.renderers.datadive import _col_kind, _pick_defaults, render_datadive
 from bulletin.renderers.html import render_report
 
-
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
 

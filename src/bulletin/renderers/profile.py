@@ -11,7 +11,6 @@ Architecture
 from __future__ import annotations
 
 import html as _html
-import math
 import typing as t
 
 if t.TYPE_CHECKING:

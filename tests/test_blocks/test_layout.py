@@ -9,7 +9,6 @@ from bulletin._error import BulletinError
 from bulletin.blocks.layout import Bulletin, Group, Page, Select, SelectType, Toggle, VAlign
 from bulletin.blocks.text import Text
 
-
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 

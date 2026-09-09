@@ -1,14 +1,13 @@
 """Tests for Block, ContainerBlock, and wrap_block."""
 from __future__ import annotations
 
-import pytest
 import pandas as pd
+import pytest
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import Block, ContainerBlock, wrap_block
-from bulletin.blocks.text import Text
 from bulletin.blocks.asset import DataTable
-
+from bulletin.blocks.base import ContainerBlock, wrap_block
+from bulletin.blocks.text import Text
 
 # ── Block ─────────────────────────────────────────────────────────────────
 

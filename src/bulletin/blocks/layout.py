@@ -6,8 +6,7 @@ import warnings
 from enum import StrEnum
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import Block, BlockId, BlockOrPrimitive, ContainerBlock
-
+from bulletin.blocks.base import BlockId, BlockOrPrimitive, ContainerBlock
 
 # ── enums ─────────────────────────────────────────────────────────────────────
 

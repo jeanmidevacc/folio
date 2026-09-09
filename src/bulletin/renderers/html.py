@@ -18,7 +18,7 @@ from __future__ import annotations
 import html as _html
 import itertools
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from importlib.resources import files
 
 from jinja2 import Environment, PackageLoader
@@ -27,7 +27,7 @@ from bulletin.blocks.asset import DataTable, Plot, Table
 from bulletin.blocks.base import Block
 from bulletin.blocks.data import DataDive, DataProfile
 from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle, VAlign
-from bulletin.blocks.text import Alert, BigNumber, Code, Formula, HTML, Text
+from bulletin.blocks.text import HTML, Alert, BigNumber, Code, Formula, Text
 from bulletin.renderers.datadive import render_datadive
 from bulletin.renderers.formatting import Formatting
 from bulletin.renderers.normalize import normalize
@@ -311,8 +311,8 @@ def _resolve_now(now: datetime | None) -> datetime:
         return now
     epoch = os.environ.get("SOURCE_DATE_EPOCH")
     if epoch:
-        return datetime.fromtimestamp(int(epoch), tz=timezone.utc)
-    return datetime.now(tz=timezone.utc)
+        return datetime.fromtimestamp(int(epoch), tz=UTC)
+    return datetime.now(tz=UTC)
 
 
 def render_report(

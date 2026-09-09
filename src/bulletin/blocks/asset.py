@@ -3,16 +3,17 @@
 These blocks hold external data (figures, DataFrames) and are serialised
 into the HTML as inline assets during the render pass.
 
-Phase 3 (Plot) and Phase 4 (Table / DataTable) implement the full rendering.
-The classes here define the public API surface so they can be used and tested
-for construction / wrapping even before rendering is implemented.
+``Table`` / ``DataTable`` accept any dataframe library ``bulletin`` can
+normalise (see :mod:`bulletin._frames`); the data is stored internally as a
+pandas DataFrame.
 """
 from __future__ import annotations
 
 import typing as t
+import warnings
 
-from bulletin._error import BulletinError
-from bulletin.blocks.base import Block, BlockId, _MAX_CAPTION_LEN, _truncate
+from bulletin._frames import is_pandas_dataframe, to_pandas
+from bulletin.blocks.base import _MAX_CAPTION_LEN, Block, BlockId, _truncate
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -51,31 +52,32 @@ class Plot(Block):
 
 
 class Table(Block):
-    """Static HTML table rendered from a pandas DataFrame or Styler.
+    """Static HTML table rendered from a dataframe or a pandas Styler.
 
     Best for multidimensional DataFrames where you want pandas' Styler
-    formatting to be preserved.
+    formatting to be preserved. A Styler is used verbatim; any other frame
+    (pandas, polars, pyarrow, …) is normalised to pandas.
 
     Example::
 
-        fl.Table(df)
-        fl.Table(df.style.highlight_max(color="lightgreen"))
+        bn.Table(df)
+        bn.Table(df.style.highlight_max(color="lightgreen"))
     """
 
     def __init__(
         self,
-        data: pd.DataFrame | Styler,
+        data: pd.DataFrame | Styler | t.Any,
         caption: str | None = None,
         name: BlockId | None = None,
         label: str | None = None,
     ) -> None:
-        try:
-            import pandas as pd
-        except ImportError as exc:
-            raise BulletinError("Table requires pandas — install it with: pip install pandas") from exc
-
         super().__init__(name=name, label=label)
-        self.data = data
+        # A Styler carries its own formatting rules — keep it as-is. Everything
+        # else goes through the dataframe intake layer.
+        if type(data).__name__ == "Styler" or is_pandas_dataframe(data):
+            self.data = data
+        else:
+            self.data = to_pandas(data, block="Table")
         self.caption = _truncate(caption, _MAX_CAPTION_LEN) if caption else caption
 
 
@@ -95,22 +97,14 @@ class DataTable(Block):
 
     def __init__(
         self,
-        df: pd.DataFrame,
+        df: pd.DataFrame | t.Any,
         caption: str | None = None,
         max_rows: int = MAX_ROWS,
         name: BlockId | None = None,
         label: str | None = None,
     ) -> None:
-        try:
-            import pandas as pd
-        except ImportError as exc:
-            raise BulletinError(
-                "DataTable requires pandas — install it with: pip install pandas"
-            ) from exc
-
-        import warnings
-
         super().__init__(name=name, label=label)
+        df = to_pandas(df, block="DataTable")
 
         if len(df) > max_rows:
             warnings.warn(

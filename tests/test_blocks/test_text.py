@@ -1,15 +1,13 @@
 """Tests for text and KPI blocks: Text, HTML, Code, Formula, BigNumber, Alert."""
 from __future__ import annotations
 
-import textwrap
 import warnings
 from pathlib import Path
 
 import pytest
 
 from bulletin._error import BulletinError
-from bulletin.blocks.text import Alert, AlertLevel, BigNumber, Code, Formula, HTML, Text
-
+from bulletin.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Formula, Text
 
 # ── Text ──────────────────────────────────────────────────────────────────────
 

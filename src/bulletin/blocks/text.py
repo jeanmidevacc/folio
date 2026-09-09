@@ -2,14 +2,12 @@
 from __future__ import annotations
 
 import textwrap
-import typing as t
 import warnings
 from enum import StrEnum
 from pathlib import Path
 
 from bulletin._error import BulletinError
-from bulletin.blocks.base import Block, BlockId, _MAX_CAPTION_LEN, _truncate
-
+from bulletin.blocks.base import _MAX_CAPTION_LEN, Block, BlockId, _truncate
 
 # ── embedded text base ───────────────────────────────────────────────────────
 

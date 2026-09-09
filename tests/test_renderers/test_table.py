@@ -10,7 +10,6 @@ from bulletin.blocks.layout import Bulletin
 from bulletin.renderers.html import render_report
 from bulletin.renderers.table import render_datatable, render_table
 
-
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
 
@@ -173,7 +172,6 @@ class TestRenderDataTable:
         assert len(ths) == 2  # not 3 (no extra index col)
 
     def test_nan_rendered_as_empty(self):
-        import numpy as np
 
         df = pd.DataFrame({"x": [1.0, float("nan"), 3.0]})
         html = render_datatable(DataTable(df))

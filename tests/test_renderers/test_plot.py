@@ -9,7 +9,6 @@ from bulletin.blocks.asset import Plot
 from bulletin.blocks.layout import Bulletin
 from bulletin.renderers.plot import detect_library, render_figure, scan_for_plots
 
-
 # ── detect_library ────────────────────────────────────────────────────────────
 
 

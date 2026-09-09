@@ -80,9 +80,9 @@ def wrap_block(b: BlockOrPrimitive) -> Block:
     """Auto-wrap primitives into appropriate blocks.
 
     Supported auto-wrapping:
-    - ``str``          → :class:`~bulletin.blocks.text.Text`
-    - ``pd.DataFrame`` → :class:`~bulletin.blocks.asset.DataTable`  (Phase 4)
-    - plot objects     → :class:`~bulletin.blocks.asset.Plot`        (Phase 3)
+    - ``str``       → :class:`~bulletin.blocks.text.Text`
+    - a dataframe   → :class:`~bulletin.blocks.asset.DataTable`
+      (pandas / polars / pyarrow / dataframe-interchange objects)
     """
     if isinstance(b, Block):
         return b
@@ -92,20 +92,16 @@ def wrap_block(b: BlockOrPrimitive) -> Block:
 
         return Text(text=b)
 
-    # Phase 3+: pandas DataFrame and plot objects
-    try:
-        import pandas as pd
+    from bulletin._frames import looks_like_dataframe
 
-        if isinstance(b, pd.DataFrame):
-            from bulletin.blocks.asset import DataTable
+    if looks_like_dataframe(b):
+        from bulletin.blocks.asset import DataTable
 
-            return DataTable(b)
-    except ImportError:
-        pass
+        return DataTable(b)
 
     raise BulletinError(
         f"Cannot auto-wrap {type(b).__name__!r} into a bulletin block. "
-        "Pass a bulletin block, a string, or a pandas DataFrame."
+        "Pass a bulletin block, a string, or a dataframe."
     )
 
 

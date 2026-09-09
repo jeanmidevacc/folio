@@ -12,7 +12,7 @@ description = "Build beautiful self-contained HTML reports from Python analysis"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
-keywords = ["data", "reporting", "html", "pandas", "pyspark", "visualization"]
+keywords = ["data", "reporting", "html", "pandas", "polars", "visualization"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -20,15 +20,20 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
+# Core install is dataframe-library agnostic. Table/DataTable/DataProfile/
+# DataDive need pandas as the internal engine — `pip install bulletin[pandas]`
+# (other libraries are accepted as input and converted).
 dependencies = [
     "jinja2>=3.1",
-    "pandas>=2.0",
     "markdown-it-py>=3.0",
 ]
 
 [project.optional-dependencies]
+# pip install bulletin[pandas]
+pandas = ["pandas>=2.0"]
 # pip install bulletin[email]
 email = [
     "premailer>=3.10",
@@ -43,7 +48,9 @@ dev = [
     "hypothesis>=6.100",
     "ruff>=0.4",
     "mypy>=1.10",
+    "pandas>=2.0",
     "pandas-stubs>=2.0",
+    "pyarrow>=15.0",
 ]
 
 [tool.pytest.ini_options]

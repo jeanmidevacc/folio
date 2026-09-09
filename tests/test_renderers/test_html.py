@@ -5,17 +5,14 @@ make real DOM-level checks rather than brittle string matching.
 """
 from __future__ import annotations
 
-import re
-
 import pytest
 from bs4 import BeautifulSoup
 
 import bulletin as bn
 from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle
-from bulletin.blocks.text import Alert, AlertLevel, BigNumber, Code, Formula, HTML, Text
+from bulletin.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Text
 from bulletin.renderers.formatting import Formatting, Width
 from bulletin.renderers.html import render_report
-
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 

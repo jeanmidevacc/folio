@@ -9,21 +9,14 @@ The classes here define the public API surface; rendering logic lives in
 from __future__ import annotations
 
 import typing as t
+import warnings
 
 from bulletin._error import BulletinError
+from bulletin._frames import to_pandas
 from bulletin.blocks.base import Block, BlockId
 
 if t.TYPE_CHECKING:
     import pandas as pd
-
-
-def _require_pandas(block_name: str) -> None:
-    try:
-        import pandas  # noqa: F401
-    except ImportError as exc:
-        raise BulletinError(
-            f"{block_name} requires pandas — install it with: pip install pandas"
-        ) from exc
 
 
 class DataProfile(Block):
@@ -35,27 +28,26 @@ class DataProfile(Block):
     - **Categorical columns**: n_unique, top values + inline SVG bar chart
     - **Datetime columns**: range, gap detection
 
-    No extra dependencies beyond pandas — mini-charts are pure SVG.
+    Mini-charts are pure SVG — no plotting dependency.
 
     Example::
 
-        fl.DataProfile(df)
-        fl.DataProfile(df, missing_threshold=0.10)  # red at >10% missing
+        bn.DataProfile(df)
+        bn.DataProfile(df, missing_threshold=0.10)  # red at >10% missing
     """
 
     def __init__(
         self,
-        df: pd.DataFrame,
+        df: pd.DataFrame | t.Any,
         missing_threshold: float = 0.20,
         max_categories: int = 20,
         name: BlockId | None = None,
         label: str | None = None,
     ) -> None:
-        _require_pandas("DataProfile")
         if not 0.0 <= missing_threshold <= 1.0:
             raise BulletinError("'missing_threshold' must be between 0.0 and 1.0.")
         super().__init__(name=name, label=label)
-        self.df = df
+        self.df = to_pandas(df, block="DataProfile")
         self.missing_threshold = missing_threshold
         self.max_categories = max_categories
 
@@ -81,7 +73,7 @@ class DataDive(Block):
 
     def __init__(
         self,
-        df: pd.DataFrame,
+        df: pd.DataFrame | t.Any,
         x: str | None = None,
         y: str | None = None,
         color: str | None = None,
@@ -92,13 +84,11 @@ class DataDive(Block):
         name: BlockId | None = None,
         label: str | None = None,
     ) -> None:
-        _require_pandas("DataDive")
-        import warnings
-
         if layout not in ("scatter", "tile"):
             raise BulletinError(f"DataDive: 'layout' must be 'scatter' or 'tile', got {layout!r}.")
 
         super().__init__(name=name, label=label)
+        df = to_pandas(df, block="DataDive")
 
         if len(df) > max_rows:
             warnings.warn(
