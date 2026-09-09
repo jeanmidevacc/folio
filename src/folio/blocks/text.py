@@ -72,8 +72,9 @@ class Text(EmbeddedTextBlock):
 class HTML(EmbeddedTextBlock):
     """Raw HTML fragment block.
 
-    The HTML is sandboxed — JavaScript is stripped by the browser's
-    sandboxed iframe in the report template.
+    The content is injected into the report verbatim, inside a plain
+    ``<div>`` — it is **not** sandboxed or sanitised. Only pass HTML you
+    trust; any ``<script>`` it contains will run.
 
     Example::
 

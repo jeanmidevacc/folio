@@ -108,12 +108,19 @@ def render_datadive(block: DataDive) -> str:
     y_label = "Y" if layout == "scatter" else "Row"
     x_label = "X" if layout == "scatter" else "Column"
 
+    # Build the Y-axis <option> list separately: in tile mode Y is optional, so it
+    # gets a leading "— none —" entry. (Kept out of the f-string below so the
+    # source stays valid on Python 3.11, which forbids backslashes in f-string
+    # expressions.)
+    y_none_option = '<option value="">— none —</option>' if layout != "scatter" else ""
+    y_options = _options_required(y_def) if layout == "scatter" else _options(y_def)
+
     controls = (
         f'<div class="fl-dd__controls">'
         f'<label class="fl-dd__ctrl">{x_label}<select class="fl-dd__sel" data-axis="x">{_options_required(x_def)}</select></label>'
         f'<label class="fl-dd__ctrl">{y_label}<select class="fl-dd__sel" data-axis="y">'
-        f'{"" if layout == "scatter" else "<option value=\"\">— none —</option>"}'
-        f'{_options_required(y_def) if layout == "scatter" else _options(y_def)}'
+        f'{y_none_option}'
+        f'{y_options}'
         f'</select></label>'
         f'<label class="fl-dd__ctrl">Color<select class="fl-dd__sel" data-axis="color"><option value="">— none —</option>{_options(color_def)}</select></label>'
         f"</div>"

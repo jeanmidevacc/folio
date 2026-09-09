@@ -1,10 +1,10 @@
 """Data analysis blocks: DataProfile, DataDive.
 
-DataProfile  — per-column statistics with inline SVG mini-charts (Phase 5).
-DataDive     — Vega-Lite powered interactive dot explorer (Phase 6).
+DataProfile  — per-column statistics with inline SVG mini-charts.
+DataDive     — interactive dot explorer drawn with hand-rolled SVG + vanilla JS.
 
-The classes here define the public API surface. Full rendering logic lives in
-the renderer (folio/renderers/html.py) and will be fleshed out in later phases.
+The classes here define the public API surface; rendering logic lives in
+``folio/renderers/profile.py`` and ``folio/renderers/datadive.py``.
 """
 from __future__ import annotations
 
@@ -61,13 +61,14 @@ class DataProfile(BaseBlock):
 
 
 class DataDive(BaseBlock):
-    """Interactive Vega-Lite powered dot explorer.
+    """Interactive dot explorer — similar to Google's Facets Dive.
 
     Each row in the DataFrame becomes a dot in a 2-D space. Dropdowns let the
     viewer dynamically reassign which columns drive X position, Y position,
-    colour and facet rows/columns — similar to Google's Facets Dive.
+    colour and facet rows/columns.
 
-    Requires Vega + Vega-Lite JS (inlined in the report, ~1 MB).
+    Fully self-contained: the plot is drawn with hand-rolled SVG and vanilla JS
+    (no Vega, D3, or CDN). The row data is embedded in the page as JSON.
 
     Example::
 
