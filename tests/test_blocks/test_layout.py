@@ -5,9 +5,9 @@ import warnings
 
 import pytest
 
-from folio._error import FolioError
-from folio.blocks.layout import Blocks, Group, Page, Select, SelectType, Toggle, VAlign
-from folio.blocks.text import Text
+from bulletin._error import BulletinError
+from bulletin.blocks.layout import Blocks, Group, Page, Select, SelectType, Toggle, VAlign
+from bulletin.blocks.text import Text
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ class TestGroup:
         assert g.widths == [2, 1]
 
     def test_widths_wrong_length_raises(self):
-        with pytest.raises(FolioError, match="widths"):
+        with pytest.raises(BulletinError, match="widths"):
             Group(*make_texts(2), columns=2, widths=[1, 2, 3])
 
     def test_valign_default(self):
@@ -63,7 +63,7 @@ class TestGroup:
         g = Group("# Title", Text("body"), columns=2)
         assert len(g) == 2
         # The string should be wrapped into a Text block
-        from folio.blocks.text import Text as T
+        from bulletin.blocks.text import Text as T
         assert isinstance(g.blocks[0], T)
 
     def test_name_and_label(self):
@@ -150,7 +150,7 @@ class TestPage:
         assert p.label is None
 
     def test_nested_page_raises(self):
-        with pytest.raises(FolioError, match="Nested Page"):
+        with pytest.raises(BulletinError, match="Nested Page"):
             Page(Page(Text("inner")))
 
     def test_blocks_kwarg(self):

@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 import typing as t
 
-from folio._error import FolioError
+from bulletin._error import BulletinError
 
 _NAME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]*$")
 _MAX_LABEL_LEN = 256
@@ -15,7 +15,7 @@ BlockOrPrimitive = t.Union["BaseBlock", t.Any]
 
 
 class BaseBlock:
-    """Base class for all folio blocks.
+    """Base class for all bulletin blocks.
 
     All blocks carry an optional ``name`` (a stable ID for referencing the
     block) and an optional ``label`` (a human-readable display string used
@@ -28,7 +28,7 @@ class BaseBlock:
         label: str | None = None,
     ) -> None:
         if name is not None and not _NAME_RE.match(name):
-            raise FolioError(
+            raise BulletinError(
                 f"Invalid block name {name!r}: must start with a letter and contain "
                 "only letters, digits, underscores, or hyphens."
             )
@@ -80,15 +80,15 @@ def wrap_block(b: BlockOrPrimitive) -> BaseBlock:
     """Auto-wrap primitives into appropriate blocks.
 
     Supported auto-wrapping:
-    - ``str``          → :class:`~folio.blocks.text.Text`
-    - ``pd.DataFrame`` → :class:`~folio.blocks.asset.DataTable`  (Phase 4)
-    - plot objects     → :class:`~folio.blocks.asset.Plot`        (Phase 3)
+    - ``str``          → :class:`~bulletin.blocks.text.Text`
+    - ``pd.DataFrame`` → :class:`~bulletin.blocks.asset.DataTable`  (Phase 4)
+    - plot objects     → :class:`~bulletin.blocks.asset.Plot`        (Phase 3)
     """
     if isinstance(b, BaseBlock):
         return b
 
     if isinstance(b, str):
-        from folio.blocks.text import Text
+        from bulletin.blocks.text import Text
 
         return Text(text=b)
 
@@ -97,15 +97,15 @@ def wrap_block(b: BlockOrPrimitive) -> BaseBlock:
         import pandas as pd
 
         if isinstance(b, pd.DataFrame):
-            from folio.blocks.asset import DataTable
+            from bulletin.blocks.asset import DataTable
 
             return DataTable(b)
     except ImportError:
         pass
 
-    raise FolioError(
-        f"Cannot auto-wrap {type(b).__name__!r} into a folio block. "
-        "Pass a folio block, a string, or a pandas DataFrame."
+    raise BulletinError(
+        f"Cannot auto-wrap {type(b).__name__!r} into a bulletin block. "
+        "Pass a bulletin block, a string, or a pandas DataFrame."
     )
 
 

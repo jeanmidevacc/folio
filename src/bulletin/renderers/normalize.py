@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import copy
 
-from folio._error import FolioError
-from folio.blocks.layout import Blocks, Group, Page, Select, SelectType
+from bulletin._error import BulletinError
+from bulletin.blocks.layout import Blocks, Group, Page, Select, SelectType
 
 
 def normalize(blocks: Blocks) -> Blocks:
@@ -17,10 +17,10 @@ def normalize(blocks: Blocks) -> Blocks:
 
     Mutations applied (in order):
 
-    1. **Empty root check** — raises :class:`~folio.FolioError` if the root
+    1. **Empty root check** — raises :class:`~bulletin.BulletinError` if the root
        ``Blocks`` has zero children.
     2. **Page → Select conversion** — if *all* top-level children are
-       :class:`~folio.Page` blocks they are converted to a single
+       :class:`~bulletin.Page` blocks they are converted to a single
        ``Select(type=TABS)`` whose children are labelled ``Group`` blocks,
        one per page.  Mixed roots (some Pages, some non-Pages) raise an error.
     """
@@ -28,14 +28,14 @@ def normalize(blocks: Blocks) -> Blocks:
     root.blocks = list(blocks.blocks)  # shallow-copy the list
 
     if len(root.blocks) == 0:
-        raise FolioError(
+        raise BulletinError(
             "Cannot render an empty Blocks container — add at least one block."
         )
 
     has_pages = [isinstance(b, Page) for b in root.blocks]
 
     if any(has_pages) and not all(has_pages):
-        raise FolioError(
+        raise BulletinError(
             "Cannot mix Page blocks with other block types at the top level. "
             "Either wrap all content in Page blocks, or use none."
         )

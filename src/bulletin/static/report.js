@@ -1,15 +1,15 @@
-/* folio report — interactive behaviour (tabs + toggles). Vanilla JS, no deps. */
+/* bulletin report — interactive behaviour (tabs + toggles). Vanilla JS, no deps. */
 (function () {
   'use strict';
 
   // ── Select / tabs ───────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.fl-select:not(.fl-select--dropdown)').forEach(function (sel) {
-    var tablist = sel.querySelector(':scope > .fl-select__tablist');
+  document.querySelectorAll('.bn-select:not(.bn-select--dropdown)').forEach(function (sel) {
+    var tablist = sel.querySelector(':scope > .bn-select__tablist');
     if (!tablist) return;
 
-    var tabs   = Array.from(tablist.querySelectorAll('.fl-select__tab'));
-    var panels = Array.from(sel.querySelectorAll(':scope > .fl-select__panel'));
+    var tabs   = Array.from(tablist.querySelectorAll('.bn-select__tab'));
+    var panels = Array.from(sel.querySelectorAll(':scope > .bn-select__panel'));
 
     function activate(idx) {
       tabs.forEach(function (t, i) {
@@ -38,9 +38,9 @@
 
   // ── Select / dropdown ────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.fl-select--dropdown').forEach(function (sel) {
-    var select = sel.querySelector('.fl-select__select');
-    var panels = Array.from(sel.querySelectorAll('.fl-select__panel'));
+  document.querySelectorAll('.bn-select--dropdown').forEach(function (sel) {
+    var select = sel.querySelector('.bn-select__select');
+    var panels = Array.from(sel.querySelectorAll('.bn-select__panel'));
 
     function activate(idx) {
       panels.forEach(function (p, i) { p.hidden = i !== idx; });
@@ -57,14 +57,14 @@
 
   // ── DataTable ────────────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.fl-datatable').forEach(function (container) {
-    var tbody    = container.querySelector('.fl-dt__table tbody');
-    var search   = container.querySelector('.fl-dt__search');
-    var countEl  = container.querySelector('.fl-dt__count');
-    var pageInfo = container.querySelector('.fl-dt__page-info');
-    var prevBtn  = container.querySelector('.fl-dt__page-btn[data-dir="-1"]');
-    var nextBtn  = container.querySelector('.fl-dt__page-btn[data-dir="1"]');
-    var headers  = Array.from(container.querySelectorAll('.fl-dt__th'));
+  document.querySelectorAll('.bn-datatable').forEach(function (container) {
+    var tbody    = container.querySelector('.bn-dt__table tbody');
+    var search   = container.querySelector('.bn-dt__search');
+    var countEl  = container.querySelector('.bn-dt__count');
+    var pageInfo = container.querySelector('.bn-dt__page-info');
+    var prevBtn  = container.querySelector('.bn-dt__page-btn[data-dir="-1"]');
+    var nextBtn  = container.querySelector('.bn-dt__page-btn[data-dir="1"]');
+    var headers  = Array.from(container.querySelectorAll('.bn-dt__th'));
 
     if (!tbody) return;
 
@@ -136,11 +136,11 @@
 
   // ── DataDive ──────────────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.fl-datadive').forEach(function (container) {
-    var dataEl = container.querySelector('.fl-dd__data');
-    var metaEl = container.querySelector('.fl-dd__meta');
-    var svgEl  = container.querySelector('.fl-dd__plot');
-    var tip    = container.querySelector('.fl-dd__tooltip');
+  document.querySelectorAll('.bn-datadive').forEach(function (container) {
+    var dataEl = container.querySelector('.bn-dd__data');
+    var metaEl = container.querySelector('.bn-dd__meta');
+    var svgEl  = container.querySelector('.bn-dd__plot');
+    var tip    = container.querySelector('.bn-dd__tooltip');
     if (!dataEl || !metaEl || !svgEl) return;
 
     var layout = container.dataset.layout || 'scatter';
@@ -149,7 +149,7 @@
     var cols = Object.keys(meta);
     var selects = {};
 
-    container.querySelectorAll('.fl-dd__sel').forEach(function (sel) {
+    container.querySelectorAll('.bn-dd__sel').forEach(function (sel) {
       selects[sel.dataset.axis] = sel;
       sel.addEventListener('change', render);
     });
@@ -198,9 +198,9 @@
         if (pos === null) continue;
         var lbl = seen[i].length > 12 ? seen[i].slice(0, 11) + '…' : seen[i];
         if (axis === 'x') {
-          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--fl-muted)">' + _esc(lbl) + '</text>';
+          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + _esc(lbl) + '</text>';
         } else {
-          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--fl-muted)">' + _esc(lbl) + '</text>';
+          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--bn-muted)">' + _esc(lbl) + '</text>';
         }
       }
       return out;
@@ -217,11 +217,11 @@
         var pos = scale(v);
         var lbl = Math.abs(v) >= 1e4 ? v.toExponential(1) : +v.toPrecision(3) + '';
         if (axis === 'x') {
-          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--fl-muted)">' + lbl + '</text>';
-          out += '<line x1="' + pos.toFixed(1) + '" y1="0" x2="' + pos.toFixed(1) + '" y2="' + PH + '" stroke="var(--fl-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
+          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + lbl + '</text>';
+          out += '<line x1="' + pos.toFixed(1) + '" y1="0" x2="' + pos.toFixed(1) + '" y2="' + PH + '" stroke="var(--bn-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
         } else {
-          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--fl-muted)">' + lbl + '</text>';
-          out += '<line x1="0" y1="' + pos.toFixed(1) + '" x2="' + PW + '" y2="' + pos.toFixed(1) + '" stroke="var(--fl-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
+          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--bn-muted)">' + lbl + '</text>';
+          out += '<line x1="0" y1="' + pos.toFixed(1) + '" x2="' + PW + '" y2="' + pos.toFixed(1) + '" stroke="var(--bn-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
         }
       }
       return out;
@@ -276,14 +276,14 @@
 
       // Axes
       var axes = (
-        '<line x1="0" y1="' + PH + '" x2="' + PW + '" y2="' + PH + '" stroke="var(--fl-border)"/>' +
-        '<line x1="0" y1="0" x2="0" y2="' + PH + '" stroke="var(--fl-border)"/>' +
+        '<line x1="0" y1="' + PH + '" x2="' + PW + '" y2="' + PH + '" stroke="var(--bn-border)"/>' +
+        '<line x1="0" y1="0" x2="0" y2="' + PH + '" stroke="var(--bn-border)"/>' +
         xTicks + yTicks
       );
 
       // Axis labels
-      var xLbl = '<text x="' + (PW/2) + '" y="' + (PH + 38) + '" text-anchor="middle" font-size="12" fill="var(--fl-muted)">' + _esc(xCol) + '</text>';
-      var yLbl = '<text transform="rotate(-90)" x="-' + (PH/2) + '" y="-42" text-anchor="middle" font-size="12" fill="var(--fl-muted)">' + _esc(yCol) + '</text>';
+      var xLbl = '<text x="' + (PW/2) + '" y="' + (PH + 38) + '" text-anchor="middle" font-size="12" fill="var(--bn-muted)">' + _esc(xCol) + '</text>';
+      var yLbl = '<text transform="rotate(-90)" x="-' + (PH/2) + '" y="-42" text-anchor="middle" font-size="12" fill="var(--bn-muted)">' + _esc(yCol) + '</text>';
 
       // Dots
       var dots = '';
@@ -292,7 +292,7 @@
         var cy = yScale(yVals[i]);
         if (cx === null || cy === null) continue;
         var fill = cVals ? colorFn(cVals[i]) : PAL[0];
-        dots += '<circle class="fl-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.5" fill="' + fill + '" fill-opacity="0.72" data-i="' + i + '"/>';
+        dots += '<circle class="bn-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.5" fill="' + fill + '" fill-opacity="0.72" data-i="' + i + '"/>';
       }
 
       svgEl.innerHTML = (
@@ -302,7 +302,7 @@
       );
 
       // Hover tooltip
-      svgEl.querySelectorAll('.fl-dd__dot').forEach(function (dot) {
+      svgEl.querySelectorAll('.bn-dd__dot').forEach(function (dot) {
         dot.addEventListener('mouseenter', function (e) {
           var row = rows[parseInt(dot.dataset.i, 10)];
           var lines = Object.keys(row).slice(0, 10).map(function (k) {
@@ -419,29 +419,29 @@
       xCats.forEach(function (xCat, xi) {
         var cx = LABEL_X + xi * cellW + cellW / 2;
         var lbl = xCat.length > 14 ? xCat.slice(0, 13) + '…' : xCat;
-        out += '<text x="' + cx.toFixed(1) + '" y="' + (LABEL_Y - 6) + '" text-anchor="middle" font-size="11" font-weight="600" fill="var(--fl-text)">' + _esc(lbl) + '</text>';
+        out += '<text x="' + cx.toFixed(1) + '" y="' + (LABEL_Y - 6) + '" text-anchor="middle" font-size="11" font-weight="600" fill="var(--bn-text)">' + _esc(lbl) + '</text>';
         // Column divider
         var dx = LABEL_X + xi * cellW;
-        out += '<line x1="' + dx + '" y1="' + LABEL_Y + '" x2="' + dx + '" y2="' + viewH + '" stroke="var(--fl-border)" stroke-width="0.5"/>';
+        out += '<line x1="' + dx + '" y1="' + LABEL_Y + '" x2="' + dx + '" y2="' + viewH + '" stroke="var(--bn-border)" stroke-width="0.5"/>';
       });
       // X-axis column header label
-      out += '<text x="' + (LABEL_X + (viewW - LABEL_X) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--fl-muted)">' + _esc(xCol) + '</text>';
+      out += '<text x="' + (LABEL_X + (viewW - LABEL_X) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + _esc(xCol) + '</text>';
 
       // Y-axis row headers
       yCats.forEach(function (yCat, yi) {
         var cy = LABEL_Y + yi * cellH + cellH / 2;
         var lbl = yCat.length > 12 ? yCat.slice(0, 11) + '…' : yCat;
-        out += '<text x="' + (LABEL_X - 8) + '" y="' + cy.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="11" font-weight="600" fill="var(--fl-text)">' + _esc(lbl) + '</text>';
+        out += '<text x="' + (LABEL_X - 8) + '" y="' + cy.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="11" font-weight="600" fill="var(--bn-text)">' + _esc(lbl) + '</text>';
         // Row divider
         var dy = LABEL_Y + yi * cellH;
-        out += '<line x1="' + LABEL_X + '" y1="' + dy + '" x2="' + viewW + '" y2="' + dy + '" stroke="var(--fl-border)" stroke-width="0.5"/>';
+        out += '<line x1="' + LABEL_X + '" y1="' + dy + '" x2="' + viewW + '" y2="' + dy + '" stroke="var(--bn-border)" stroke-width="0.5"/>';
       });
       if (yCol) {
-        out += '<text transform="rotate(-90)" x="-' + (LABEL_Y + (viewH - LABEL_Y) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--fl-muted)">' + _esc(yCol) + '</text>';
+        out += '<text transform="rotate(-90)" x="-' + (LABEL_Y + (viewH - LABEL_Y) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + _esc(yCol) + '</text>';
       }
 
       // Outer border
-      out += '<rect x="' + LABEL_X + '" y="' + LABEL_Y + '" width="' + (viewW - LABEL_X) + '" height="' + (viewH - LABEL_Y) + '" fill="none" stroke="var(--fl-border)"/>';
+      out += '<rect x="' + LABEL_X + '" y="' + LABEL_Y + '" width="' + (viewW - LABEL_X) + '" height="' + (viewH - LABEL_Y) + '" fill="none" stroke="var(--bn-border)"/>';
 
       // Dots per cell
       var dotEls = [];
@@ -461,7 +461,7 @@
 
             var cVal = colorCol ? rows[ri][colorCol] : null;
             var fill = colorCol ? colorFn(cVal) : PAL[0];
-            var el = '<circle class="fl-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
+            var el = '<circle class="bn-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
               '" r="' + DOT_R + '" fill="' + fill + '" fill-opacity="0.8" data-i="' + ri + '"/>';
             out += el;
             dotEls.push(ri);
@@ -472,7 +472,7 @@
       svgEl.innerHTML = out;
 
       // Tooltip
-      svgEl.querySelectorAll('.fl-dd__dot').forEach(function (dot) {
+      svgEl.querySelectorAll('.bn-dd__dot').forEach(function (dot) {
         dot.addEventListener('mouseenter', function (e) {
           var row = rows[parseInt(dot.dataset.i, 10)];
           var lines = Object.keys(row).slice(0, 10).map(function (k) {
@@ -498,7 +498,7 @@
       if (layout === 'tile') renderTile(); else render();
     }
 
-    container.querySelectorAll('.fl-dd__sel').forEach(function (sel) {
+    container.querySelectorAll('.bn-dd__sel').forEach(function (sel) {
       sel.removeEventListener('change', render);
       sel.addEventListener('change', redraw);
     });
@@ -508,7 +508,7 @@
 
   // ── Toggle ───────────────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.fl-toggle__header').forEach(function (header) {
+  document.querySelectorAll('.bn-toggle__header').forEach(function (header) {
     var bodyId = header.getAttribute('aria-controls');
     var body   = bodyId ? document.getElementById(bodyId) : header.nextElementSibling;
 

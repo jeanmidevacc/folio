@@ -7,8 +7,8 @@ import warnings
 from enum import StrEnum
 from pathlib import Path
 
-from folio._error import FolioError
-from folio.blocks.base import BaseBlock, BlockId, _MAX_CAPTION_LEN, _truncate
+from bulletin._error import BulletinError
+from bulletin.blocks.base import BaseBlock, BlockId, _MAX_CAPTION_LEN, _truncate
 
 
 # ── embedded text base ───────────────────────────────────────────────────────
@@ -54,16 +54,16 @@ class Text(EmbeddedTextBlock):
         label: str | None = None,
     ) -> None:
         if not text and not file:
-            raise FolioError("Text block requires either 'text' or 'file'.")
+            raise BulletinError("Text block requires either 'text' or 'file'.")
         if text and file:
-            raise FolioError("Text block accepts 'text' or 'file', not both.")
+            raise BulletinError("Text block accepts 'text' or 'file', not both.")
 
         if text:
             content = textwrap.dedent(text).strip()
         else:
             path = Path(file).expanduser()  # type: ignore[arg-type]
             if not path.exists():
-                raise FolioError(f"File not found: {path}")
+                raise BulletinError(f"File not found: {path}")
             content = path.read_text(encoding="utf-8")
 
         super().__init__(content=content, name=name, label=label)

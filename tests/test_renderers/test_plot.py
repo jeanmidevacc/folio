@@ -4,10 +4,10 @@ from __future__ import annotations
 import pytest
 from bs4 import BeautifulSoup
 
-from folio._error import FolioError
-from folio.blocks.asset import Plot
-from folio.blocks.layout import Blocks
-from folio.renderers.plot import detect_library, render_figure, scan_for_plots
+from bulletin._error import BulletinError
+from bulletin.blocks.asset import Plot
+from bulletin.blocks.layout import Blocks
+from bulletin.renderers.plot import detect_library, render_figure, scan_for_plots
 
 
 # ── detect_library ────────────────────────────────────────────────────────────
@@ -42,11 +42,11 @@ class TestDetectLibrary:
         assert detect_library(chart) == "altair"
 
     def test_unknown_object_raises(self):
-        with pytest.raises(FolioError, match="Unsupported figure type"):
+        with pytest.raises(BulletinError, match="Unsupported figure type"):
             detect_library(object())
 
     def test_unknown_object_raises_for_dict(self):
-        with pytest.raises(FolioError):
+        with pytest.raises(BulletinError):
             detect_library({"not": "a figure"})
 
 
@@ -55,7 +55,7 @@ class TestDetectLibrary:
 
 class TestScanForPlots:
     def test_empty_blocks_returns_empty_set(self):
-        from folio.blocks.text import Text
+        from bulletin.blocks.text import Text
 
         root = Blocks(Text("hi"))
         assert scan_for_plots(root) == set()
@@ -77,7 +77,7 @@ class TestScanForPlots:
 
     def test_finds_nested_plot(self):
         mpl = pytest.importorskip("matplotlib.pyplot")
-        from folio.blocks.layout import Group
+        from bulletin.blocks.layout import Group
 
         fig, _ = mpl.subplots()
         root = Blocks(Group(Plot(fig)))
@@ -125,7 +125,7 @@ class TestRenderMatplotlib:
         html = render_figure(Plot(fig))
         soup = BeautifulSoup(html, "html.parser")
         assert soup.find("figure") is not None
-        assert "fl-plot" in soup.find("figure")["class"]
+        assert "bn-plot" in soup.find("figure")["class"]
 
     def test_responsive_removes_fixed_width(self):
         fig, _ = self.mpl.subplots()
@@ -202,7 +202,7 @@ class TestRenderUnsupported:
     def test_unsupported_figure_returns_placeholder(self):
         html = render_figure(Plot(object()))
         soup = BeautifulSoup(html, "html.parser")
-        placeholder = soup.find(class_="fl-placeholder")
+        placeholder = soup.find(class_="bn-placeholder")
         assert placeholder is not None
         assert "Unsupported" in placeholder.text
 
@@ -213,7 +213,7 @@ class TestRenderUnsupported:
 class TestRenderReportWithPlot:
     def test_matplotlib_in_full_report(self):
         mpl = pytest.importorskip("matplotlib.pyplot")
-        from folio.renderers.html import render_report
+        from bulletin.renderers.html import render_report
 
         fig, ax = mpl.subplots()
         ax.plot([1, 2, 3])
@@ -227,7 +227,7 @@ class TestRenderReportWithPlot:
 
     def test_plotly_runtime_embedded_once(self):
         go = pytest.importorskip("plotly.graph_objects")
-        from folio.renderers.html import render_report
+        from bulletin.renderers.html import render_report
 
         fig = go.Figure()
         html = render_report(Blocks(Plot(fig), Plot(go.Figure())))

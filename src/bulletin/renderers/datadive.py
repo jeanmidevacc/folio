@@ -19,7 +19,7 @@ import json
 import typing as t
 
 if t.TYPE_CHECKING:
-    from folio.blocks.data import DataDive
+    from bulletin.blocks.data import DataDive
 
 
 # ── column classification ─────────────────────────────────────────────────────
@@ -76,11 +76,11 @@ def _serialise(df: t.Any) -> str:
 
 
 def render_datadive(block: DataDive) -> str:
-    """Render a :class:`~folio.DataDive` block to a self-contained interactive SVG explorer."""
+    """Render a :class:`~bulletin.DataDive` block to a self-contained interactive SVG explorer."""
     df = block.df
     cols = list(df.columns)
     if not cols:
-        return '<div class="fl-block fl-placeholder">⚠ DataDive: no columns to display.</div>'
+        return '<div class="bn-block bn-placeholder">⚠ DataDive: no columns to display.</div>'
 
     # Column metadata for the JS scale engine
     meta = {col: _col_kind(df[col]) for col in cols}
@@ -116,13 +116,13 @@ def render_datadive(block: DataDive) -> str:
     y_options = _options_required(y_def) if layout == "scatter" else _options(y_def)
 
     controls = (
-        f'<div class="fl-dd__controls">'
-        f'<label class="fl-dd__ctrl">{x_label}<select class="fl-dd__sel" data-axis="x">{_options_required(x_def)}</select></label>'
-        f'<label class="fl-dd__ctrl">{y_label}<select class="fl-dd__sel" data-axis="y">'
+        f'<div class="bn-dd__controls">'
+        f'<label class="bn-dd__ctrl">{x_label}<select class="bn-dd__sel" data-axis="x">{_options_required(x_def)}</select></label>'
+        f'<label class="bn-dd__ctrl">{y_label}<select class="bn-dd__sel" data-axis="y">'
         f'{y_none_option}'
         f'{y_options}'
         f'</select></label>'
-        f'<label class="fl-dd__ctrl">Color<select class="fl-dd__sel" data-axis="color"><option value="">— none —</option>{_options(color_def)}</select></label>'
+        f'<label class="bn-dd__ctrl">Color<select class="bn-dd__sel" data-axis="color"><option value="">— none —</option>{_options(color_def)}</select></label>'
         f"</div>"
     )
 
@@ -133,15 +133,15 @@ def render_datadive(block: DataDive) -> str:
     aria = f"DataDive {layout} plot"
 
     return (
-        f'<div class="fl-block fl-datadive" data-layout="{layout}">'
+        f'<div class="bn-block bn-datadive" data-layout="{layout}">'
         f"{controls}"
-        f'<div class="fl-dd__plot-area">'
-        f'<svg class="fl-dd__plot" viewBox="{vb}" aria-label="{aria}"></svg>'
-        f'<div class="fl-dd__tooltip" hidden></div>'
+        f'<div class="bn-dd__plot-area">'
+        f'<svg class="bn-dd__plot" viewBox="{vb}" aria-label="{aria}"></svg>'
+        f'<div class="bn-dd__tooltip" hidden></div>'
         f"</div>"
-        f'<div class="fl-dd__footer">{n_rows:,} rows</div>'
-        f'<script type="application/json" class="fl-dd__data">{data_json}</script>'
-        f'<script type="application/json" class="fl-dd__meta">{meta_json}</script>'
+        f'<div class="bn-dd__footer">{n_rows:,} rows</div>'
+        f'<script type="application/json" class="bn-dd__data">{data_json}</script>'
+        f'<script type="application/json" class="bn-dd__meta">{meta_json}</script>'
         f"</div>"
     )
 

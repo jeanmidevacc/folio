@@ -3,10 +3,10 @@ from __future__ import annotations
 
 import pytest
 
-from folio._error import FolioError
-from folio.blocks.layout import Blocks, Group, Page, Select, SelectType
-from folio.blocks.text import Text
-from folio.renderers.normalize import normalize
+from bulletin._error import BulletinError
+from bulletin.blocks.layout import Blocks, Group, Page, Select, SelectType
+from bulletin.blocks.text import Text
+from bulletin.renderers.normalize import normalize
 
 
 class TestNormalize:
@@ -17,7 +17,7 @@ class TestNormalize:
         assert all(isinstance(b, Text) for b in result.blocks)
 
     def test_empty_blocks_raises(self):
-        with pytest.raises(FolioError, match="empty"):
+        with pytest.raises(BulletinError, match="empty"):
             normalize(Blocks())
 
     def test_pages_converted_to_select(self):
@@ -61,7 +61,7 @@ class TestNormalize:
         assert select.blocks[0].name == "page-a"
 
     def test_mixed_pages_and_blocks_raises(self):
-        with pytest.raises(FolioError, match="mix"):
+        with pytest.raises(BulletinError, match="mix"):
             normalize(Blocks(Page(Text("x"), title="P"), Text("not a page")))
 
     def test_normalize_does_not_mutate_original(self):

@@ -11,14 +11,14 @@
   {% if head_scripts %}{{ head_scripts }}{% endif %}
 </head>
 <body>
-  <div class="fl-report">
+  <div class="bn-report">
     {% if show_header %}
-    <header class="fl-report__header">
-      <span class="fl-report__title">{{ report_name }}</span>
-      <time class="fl-report__date" datetime="{{ report_date_iso }}">{{ report_date }}</time>
+    <header class="bn-report__header">
+      <span class="bn-report__title">{{ report_name }}</span>
+      <time class="bn-report__date" datetime="{{ report_date_iso }}">{{ report_date }}</time>
     </header>
     {% endif %}
-    <main class="fl-report__body">
+    <main class="bn-report__body">
       {{ content_html }}
     </main>
   </div>

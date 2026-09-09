@@ -5,8 +5,8 @@ import typing as t
 import warnings
 from enum import StrEnum
 
-from folio._error import FolioError
-from folio.blocks.base import BaseBlock, BlockId, BlockOrPrimitive, ContainerBlock
+from bulletin._error import BulletinError
+from bulletin.blocks.base import BaseBlock, BlockId, BlockOrPrimitive, ContainerBlock
 
 
 # ── enums ─────────────────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ class Group(ContainerBlock):
         label: str | None = None,
     ) -> None:
         if widths is not None and len(widths) != columns:
-            raise FolioError(
+            raise BulletinError(
                 f"Group 'widths' length ({len(widths)}) must match 'columns' ({columns})."
             )
         super().__init__(*arg_blocks, blocks=blocks, name=name, label=label)
@@ -142,7 +142,7 @@ class Page(ContainerBlock):
     ) -> None:
         resolved = list(blocks if blocks is not None else arg_blocks)
         if any(isinstance(b, Page) for b in resolved):
-            raise FolioError("Nested Page blocks are not supported — use Select and Group instead.")
+            raise BulletinError("Nested Page blocks are not supported — use Select and Group instead.")
         # label carries the title so the renderer can use it generically.
         super().__init__(*arg_blocks, blocks=blocks, name=name, label=title)
         self.title = title

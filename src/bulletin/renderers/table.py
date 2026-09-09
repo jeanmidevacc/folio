@@ -4,7 +4,7 @@ Table
 -----
 Renders a pandas DataFrame or Styler as a styled static HTML table.
 If the user passes a Styler, its inline CSS is preserved verbatim;
-otherwise a plain ``<table>`` is emitted with folio's own table CSS.
+otherwise a plain ``<table>`` is emitted with bulletin's own table CSS.
 
 DataTable
 ---------
@@ -21,10 +21,10 @@ from __future__ import annotations
 import html as _html
 import typing as t
 
-from folio._error import FolioError
+from bulletin._error import BulletinError
 
 if t.TYPE_CHECKING:
-    from folio.blocks.asset import DataTable, Table
+    from bulletin.blocks.asset import DataTable, Table
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -57,12 +57,12 @@ def _use_index(df: t.Any) -> bool:
 
 
 def render_table(block: Table) -> str:
-    """Render a :class:`~folio.Table` block to a static HTML table fragment."""
+    """Render a :class:`~bulletin.Table` block to a static HTML table fragment."""
     try:
         import pandas as pd
         from pandas.io.formats.style import Styler
     except ImportError as exc:
-        raise FolioError("Table requires pandas — install it with: pip install pandas") from exc
+        raise BulletinError("Table requires pandas — install it with: pip install pandas") from exc
 
     data = block.data
 
@@ -71,19 +71,19 @@ def render_table(block: Table) -> str:
         table_html = data.to_html()
     else:
         table_html = data.to_html(
-            classes="fl-table__table",
+            classes="bn-table__table",
             border=0,
             index=_use_index(data),
         )
 
     caption_html = (
-        f'<div class="fl-table__caption">{_html.escape(block.caption)}</div>'
+        f'<div class="bn-table__caption">{_html.escape(block.caption)}</div>'
         if block.caption
         else ""
     )
     return (
-        f'<div class="fl-block fl-table">'
-        f'<div class="fl-table__scroll">{table_html}</div>'
+        f'<div class="bn-block bn-table">'
+        f'<div class="bn-table__scroll">{table_html}</div>'
         f"{caption_html}"
         f"</div>"
     )
@@ -93,7 +93,7 @@ def render_table(block: Table) -> str:
 
 
 def render_datatable(block: DataTable) -> str:
-    """Render a :class:`~folio.DataTable` block to an interactive HTML table."""
+    """Render a :class:`~bulletin.DataTable` block to an interactive HTML table."""
     df = block.df
     show_index = _use_index(df)
 
@@ -103,17 +103,17 @@ def render_datatable(block: DataTable) -> str:
     if show_index:
         idx_name = _html.escape(str(df.index.name or ""))
         header_cells += (
-            f'<th class="fl-dt__th" data-col="{col_idx}" scope="col">'
+            f'<th class="bn-dt__th" data-col="{col_idx}" scope="col">'
             f"<span>{idx_name}</span>"
-            f'<span class="fl-dt__sort-icon" aria-hidden="true"></span>'
+            f'<span class="bn-dt__sort-icon" aria-hidden="true"></span>'
             f"</th>"
         )
         col_idx += 1
     for col in df.columns:
         header_cells += (
-            f'<th class="fl-dt__th" data-col="{col_idx}" scope="col">'
+            f'<th class="bn-dt__th" data-col="{col_idx}" scope="col">'
             f"<span>{_html.escape(str(col))}</span>"
-            f'<span class="fl-dt__sort-icon" aria-hidden="true"></span>'
+            f'<span class="bn-dt__sort-icon" aria-hidden="true"></span>'
             f"</th>"
         )
         col_idx += 1
@@ -129,26 +129,26 @@ def render_datatable(block: DataTable) -> str:
         rows_html += f"<tr>{cells}</tr>"
 
     caption_html = (
-        f'<div class="fl-dt__caption">{_html.escape(block.caption)}</div>'
+        f'<div class="bn-dt__caption">{_html.escape(block.caption)}</div>'
         if block.caption
         else ""
     )
     return (
-        f'<div class="fl-block fl-datatable">'
-        f'<div class="fl-dt__toolbar">'
-        f'<input class="fl-dt__search" type="search" placeholder="Search…" aria-label="Search table" />'
-        f'<span class="fl-dt__count"></span>'
+        f'<div class="bn-block bn-datatable">'
+        f'<div class="bn-dt__toolbar">'
+        f'<input class="bn-dt__search" type="search" placeholder="Search…" aria-label="Search table" />'
+        f'<span class="bn-dt__count"></span>'
         f"</div>"
-        f'<div class="fl-dt__scroll">'
-        f'<table class="fl-dt__table">'
+        f'<div class="bn-dt__scroll">'
+        f'<table class="bn-dt__table">'
         f"<thead><tr>{header_cells}</tr></thead>"
         f"<tbody>{rows_html}</tbody>"
         f"</table>"
         f"</div>"
-        f'<div class="fl-dt__footer">'
-        f'<button class="fl-dt__page-btn" data-dir="-1">&#8592; Prev</button>'
-        f'<span class="fl-dt__page-info"></span>'
-        f'<button class="fl-dt__page-btn" data-dir="1">Next &#8594;</button>'
+        f'<div class="bn-dt__footer">'
+        f'<button class="bn-dt__page-btn" data-dir="-1">&#8592; Prev</button>'
+        f'<span class="bn-dt__page-info"></span>'
+        f'<button class="bn-dt__page-btn" data-dir="1">Next &#8594;</button>'
         f"</div>"
         f"{caption_html}"
         f"</div>"

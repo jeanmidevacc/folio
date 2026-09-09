@@ -1,37 +1,37 @@
-# folio
+# bulletin
 
 Build beautiful, self-contained HTML reports from Python analysis.
 
-## Why folio exists
+## Why bulletin exists
 
 Two libraries shaped how I thought about sharing data science work:
 
 - **[datapane](https://github.com/datapane/datapane)** — the cleanest Python-native report builder I had ever used. Block-based, self-contained HTML output, dead-simple API. It was decommissioned in 2023 and the SaaS shut down shortly after.
 - **[Facets](https://github.com/PAIR-code/facets)** (PAIR / Google) — specifically *Facets Dive*, a brilliant interactive dot explorer that let you slice any dataset visually with zero configuration. The project went largely unmaintained and quietly disappeared from most data science workflows.
 
-I never found a substitute that matched either of them, let alone both at once. folio is my attempt to fill that gap: a datapane-style block and layout system with a Facets Dive-class explorer built in, fully offline, no cloud account required.
+I never found a substitute that matched either of them, let alone both at once. bulletin is my attempt to fill that gap: a datapane-style block and layout system with a Facets Dive-class explorer built in, fully offline, no cloud account required.
 
-Building folio also serves a second purpose: it is a real-world, non-trivial Python project used to benchmark coding agents such as [Claude Code](https://github.com/anthropics/claude-code). Designing a library from original source code — with concept ofblock hierarchy, rendering pipeline, theming, interactive components — gives a coding agent enough surface area to show where it genuinely helps and where it still struggles.
+Building bulletin also serves a second purpose: it is a real-world, non-trivial Python project used to benchmark coding agents such as [Claude Code](https://github.com/anthropics/claude-code). Designing a library from original source code — with concept ofblock hierarchy, rendering pipeline, theming, interactive components — gives a coding agent enough surface area to show where it genuinely helps and where it still struggles.
 
 ```python
-import folio as fl
+import bulletin as bn
 
-report = fl.Blocks(
-    fl.Text("# Sales Analysis — Q1 2024"),
-    fl.Group(
-        fl.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False),
-        fl.BigNumber("Active Users", "142K", change="+3%", is_upward_change=True),
+report = bn.Blocks(
+    bn.Text("# Sales Analysis — Q1 2024"),
+    bn.Group(
+        bn.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False),
+        bn.BigNumber("Active Users", "142K", change="+3%", is_upward_change=True),
         columns=2,
     ),
-    fl.Select(
-        fl.Plot(fig, label="Trend"),
-        fl.DataTable(df, label="Raw Data"),
-        fl.DataProfile(df, label="Profile"),
+    bn.Select(
+        bn.Plot(fig, label="Trend"),
+        bn.DataTable(df, label="Raw Data"),
+        bn.DataProfile(df, label="Profile"),
     ),
-    fl.DataDive(df),
+    bn.DataDive(df),
 )
 
-fl.save_report(report, "q1_analysis.html")
+bn.save_report(report, "q1_analysis.html")
 ```
 
 ## Features
@@ -47,9 +47,9 @@ fl.save_report(report, "q1_analysis.html")
 ## Installation
 
 ```bash
-pip install folio
+pip install bulletin
 # with email support
-pip install folio[email]
+pip install bulletin[email]
 ```
 
 ---
@@ -58,14 +58,14 @@ pip install folio[email]
 
 ```python
 import pandas as pd
-import folio as fl
+import bulletin as bn
 
 df = pd.read_csv("sales.csv")
 
-fl.save_report(
-    fl.Blocks(
-        fl.Text("# My Report"),
-        fl.DataTable(df),
+bn.save_report(
+    bn.Blocks(
+        bn.Text("# My Report"),
+        bn.DataTable(df),
     ),
     path="report.html",
     open=True,          # opens in browser immediately
@@ -77,17 +77,17 @@ To get an HTML string instead of writing a file (useful in Jupyter):
 ```python
 from IPython.display import HTML, display
 
-display(HTML(fl.stringify_report(fl.Blocks(fl.Text("# Hello")))))
+display(HTML(bn.stringify_report(bn.Blocks(bn.Text("# Hello")))))
 ```
 
 ---
 
 ## API
 
-### `fl.save_report`
+### `bn.save_report`
 
 ```python
-fl.save_report(
+bn.save_report(
     blocks,                  # Blocks, list, or a single block
     path,                    # destination file — e.g. "report.html"
     *,
@@ -97,10 +97,10 @@ fl.save_report(
 )
 ```
 
-### `fl.stringify_report`
+### `bn.stringify_report`
 
 ```python
-html: str = fl.stringify_report(
+html: str = bn.stringify_report(
     blocks,
     *,
     name="Report",
@@ -114,13 +114,13 @@ html: str = fl.stringify_report(
 
 ### Text blocks
 
-#### `fl.Text` — Markdown
+#### `bn.Text` — Markdown
 
 ```python
-fl.Text("# Heading\n\nSome **bold** and *italic* text.")
+bn.Text("# Heading\n\nSome **bold** and *italic* text.")
 
 # From a .md file
-fl.Text(file="notes.md")
+bn.Text(file="notes.md")
 ```
 
 | Parameter | Type | Description |
@@ -133,12 +133,12 @@ Supports headings, bold, italics, inline code, blockquotes, tables, and lists.
 
 ---
 
-#### `fl.Code` — Syntax-highlighted code
+#### `bn.Code` — Syntax-highlighted code
 
 ```python
-fl.Code("SELECT * FROM orders LIMIT 10", language="sql")
-fl.Code(
-    "import folio as fl\nfl.save_report(fl.Blocks(fl.Text('# Hi')), 'out.html')",
+bn.Code("SELECT * FROM orders LIMIT 10", language="sql")
+bn.Code(
+    "import bulletin as bn\nfl.save_report(bn.Blocks(bn.Text('# Hi')), 'out.html')",
     language="python",
     caption="Minimal report",
 )
@@ -152,10 +152,10 @@ fl.Code(
 
 ---
 
-#### `fl.Formula` — LaTeX equation
+#### `bn.Formula` — LaTeX equation
 
 ```python
-fl.Formula(r"\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i", caption="Sample mean")
+bn.Formula(r"\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i", caption="Sample mean")
 ```
 
 Rendered via MathJax (inlined in the report — no CDN needed).
@@ -167,21 +167,21 @@ Rendered via MathJax (inlined in the report — no CDN needed).
 
 ---
 
-#### `fl.HTML` — Raw HTML fragment
+#### `bn.HTML` — Raw HTML fragment
 
 ```python
-fl.HTML("<p style='color:#4F46E5'>Custom <strong>HTML</strong>.</p>")
+bn.HTML("<p style='color:#4F46E5'>Custom <strong>HTML</strong>.</p>")
 ```
 
 Rendered inside a sandboxed container — inline styles work, scripts are stripped.
 
 ---
 
-#### `fl.BigNumber` — KPI metric
+#### `bn.BigNumber` — KPI metric
 
 ```python
-fl.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False)
-fl.BigNumber("Accuracy", 0.924)   # no change indicator
+bn.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False)
+bn.BigNumber("Accuracy", 0.924)   # no change indicator
 ```
 
 | Parameter | Type | Default | Description |
@@ -195,12 +195,12 @@ fl.BigNumber("Accuracy", 0.924)   # no change indicator
 
 ---
 
-#### `fl.Alert` — Callout box
+#### `bn.Alert` — Callout box
 
 ```python
-fl.Alert("Pipeline completed successfully.", level=fl.AlertLevel.SUCCESS)
-fl.Alert("Margin erosion in South region.", level="warning", title="Watch")
-fl.Alert("Legacy source decommissioned.", level=fl.AlertLevel.ERROR, title="Breaking change")
+bn.Alert("Pipeline completed successfully.", level=bn.AlertLevel.SUCCESS)
+bn.Alert("Margin erosion in South region.", level="warning", title="Watch")
+bn.Alert("Legacy source decommissioned.", level=bn.AlertLevel.ERROR, title="Breaking change")
 ```
 
 | Parameter | Type | Default | Description |
@@ -209,19 +209,19 @@ fl.Alert("Legacy source decommissioned.", level=fl.AlertLevel.ERROR, title="Brea
 | `level` | `AlertLevel \| str` | `"info"` | One of `info`, `success`, `warning`, `error` |
 | `title` | `str` | `None` | Optional bold title above the message |
 
-`fl.AlertLevel` values: `INFO`, `SUCCESS`, `WARNING`, `ERROR`.
+`bn.AlertLevel` values: `INFO`, `SUCCESS`, `WARNING`, `ERROR`.
 
 ---
 
 ### Layout blocks
 
-#### `fl.Group` — Grid layout
+#### `bn.Group` — Grid layout
 
 Arranges child blocks in a responsive column grid.
 
 ```python
-fl.Group(plot_a, plot_b, columns=2)
-fl.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
+bn.Group(plot_a, plot_b, columns=2)
+bn.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
 ```
 
 | Parameter | Type | Default | Description |
@@ -234,16 +234,16 @@ fl.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
 
 ---
 
-#### `fl.Select` — Tabbed or dropdown panel switcher
+#### `bn.Select` — Tabbed or dropdown panel switcher
 
 Shows one child block at a time. Each child's `label` becomes the tab title.
 
 ```python
-fl.Select(
-    fl.Plot(fig, label="Chart"),
-    fl.DataTable(df, label="Data"),
-    fl.DataProfile(df, label="Profile"),
-    type=fl.SelectType.TABS,       # or fl.SelectType.DROPDOWN
+bn.Select(
+    bn.Plot(fig, label="Chart"),
+    bn.DataTable(df, label="Data"),
+    bn.DataProfile(df, label="Profile"),
+    type=bn.SelectType.TABS,       # or bn.SelectType.DROPDOWN
 )
 ```
 
@@ -256,14 +256,14 @@ fl.Select(
 
 ---
 
-#### `fl.Toggle` — Collapsible section
+#### `bn.Toggle` — Collapsible section
 
 Collapsed by default; click the label to expand.
 
 ```python
-fl.Toggle(
-    fl.Text("Methodology notes — hidden by default."),
-    fl.Code("SELECT * FROM sales\n", language="sql"),
+bn.Toggle(
+    bn.Text("Methodology notes — hidden by default."),
+    bn.Code("SELECT * FROM sales\n", language="sql"),
     label="Query details",
 )
 ```
@@ -275,14 +275,14 @@ fl.Toggle(
 
 ---
 
-#### `fl.Page` — Top-level page tab
+#### `bn.Page` — Top-level page tab
 
 Use at the root of `Blocks` to create multi-page reports. Pages are converted to a top-level tab bar during rendering.
 
 ```python
-fl.Blocks(
-    fl.Page(summary_group, title="Summary"),
-    fl.Page(detail_group, title="Detail"),
+bn.Blocks(
+    bn.Page(summary_group, title="Summary"),
+    bn.Page(detail_group, title="Detail"),
 )
 ```
 
@@ -295,24 +295,24 @@ fl.Blocks(
 
 ---
 
-#### `fl.Blocks` — Root document container
+#### `bn.Blocks` — Root document container
 
 Top-level wrapper passed to `save_report`. Accepts any combination of blocks.
 
 ```python
-report = fl.Blocks(
-    fl.Text("# My Report"),
-    fl.Plot(fig),
-    fl.DataTable(df),
+report = bn.Blocks(
+    bn.Text("# My Report"),
+    bn.Plot(fig),
+    bn.DataTable(df),
 )
-fl.save_report(report, "report.html")
+bn.save_report(report, "report.html")
 ```
 
 ---
 
 ### Asset blocks
 
-#### `fl.Plot` — Chart / figure
+#### `bn.Plot` — Chart / figure
 
 Library-agnostic chart block. Auto-detects the figure type at render time:
 
@@ -324,9 +324,9 @@ Library-agnostic chart block. Auto-detects the figure type at render time:
 | **Bokeh** | Inline resources |
 
 ```python
-fl.Plot(plotly_fig, caption="Revenue over time")
-fl.Plot(altair_chart, label="Chart", responsive=True)
-fl.Plot(mpl_fig, scale=1.5)
+bn.Plot(plotly_fig, caption="Revenue over time")
+bn.Plot(altair_chart, label="Chart", responsive=True)
+bn.Plot(mpl_fig, scale=1.5)
 ```
 
 | Parameter | Type | Default | Description |
@@ -338,13 +338,13 @@ fl.Plot(mpl_fig, scale=1.5)
 
 ---
 
-#### `fl.Table` — Static table (pandas Styler)
+#### `bn.Table` — Static table (pandas Styler)
 
 Best for formatted DataFrames where you want to preserve Styler rules.
 
 ```python
-fl.Table(df)
-fl.Table(
+bn.Table(df)
+bn.Table(
     df.style
       .format({"revenue": "€ {:,.0f}"})
       .bar(subset=["revenue"], color="#c7d2fe")
@@ -359,13 +359,13 @@ fl.Table(
 
 ---
 
-#### `fl.DataTable` — Interactive table
+#### `bn.DataTable` — Interactive table
 
 Sortable, searchable, paginated table. Handles large datasets gracefully.
 
 ```python
-fl.DataTable(df, caption="Full sales dataset")
-fl.DataTable(df, max_rows=500)   # cap at 500 rows
+bn.DataTable(df, caption="Full sales dataset")
+bn.DataTable(df, max_rows=500)   # cap at 500 rows
 ```
 
 | Parameter | Type | Default | Description |
@@ -378,7 +378,7 @@ fl.DataTable(df, max_rows=500)   # cap at 500 rows
 
 ### Data blocks
 
-#### `fl.DataProfile` — Column statistics
+#### `bn.DataProfile` — Column statistics
 
 Renders one card per column with dtype, missing %, and a mini-chart.
 
@@ -389,9 +389,9 @@ Renders one card per column with dtype, missing %, and a mini-chart.
 No extra dependencies — mini-charts are pure SVG.
 
 ```python
-fl.DataProfile(df)
-fl.DataProfile(df, missing_threshold=0.05)   # red highlight at >5% missing
-fl.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
+bn.DataProfile(df)
+bn.DataProfile(df, missing_threshold=0.05)   # red highlight at >5% missing
+bn.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
 ```
 
 | Parameter | Type | Default | Description |
@@ -402,14 +402,14 @@ fl.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
 
 ---
 
-#### `fl.DataDive` — Interactive dot explorer
+#### `bn.DataDive` — Interactive dot explorer
 
 Each DataFrame row becomes a dot. Dropdowns let the viewer dynamically change which columns drive X, Y, colour, and facets — similar to Google Facets Dive.
 
 ```python
-fl.DataDive(df)                                              # auto-selects axes
-fl.DataDive(df, x="revenue", y="margin_pct", color="region")
-fl.DataDive(df, x="region", y="channel", color="product", layout="tile")
+bn.DataDive(df)                                              # auto-selects axes
+bn.DataDive(df, x="revenue", y="margin_pct", color="region")
+bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```
 
 | Parameter | Type | Default | Description |
@@ -432,11 +432,11 @@ Pass a `Formatting` instance to `save_report` to control the visual style.
 ### Built-in presets
 
 ```python
-fl.save_report(blocks, "out.html", formatting=fl.Formatting.dark())
-fl.save_report(blocks, "out.html", formatting=fl.Formatting.corporate())
-fl.save_report(blocks, "out.html", formatting=fl.Formatting.minimal())
-fl.save_report(blocks, "out.html", formatting=fl.Formatting.ocean())
-fl.save_report(blocks, "out.html", formatting=fl.Formatting.warm())
+bn.save_report(blocks, "out.html", formatting=bn.Formatting.dark())
+bn.save_report(blocks, "out.html", formatting=bn.Formatting.corporate())
+bn.save_report(blocks, "out.html", formatting=bn.Formatting.minimal())
+bn.save_report(blocks, "out.html", formatting=bn.Formatting.ocean())
+bn.save_report(blocks, "out.html", formatting=bn.Formatting.warm())
 ```
 
 | Preset | Description |
@@ -452,14 +452,14 @@ fl.save_report(blocks, "out.html", formatting=fl.Formatting.warm())
 Every preset accepts keyword overrides:
 
 ```python
-formatting=fl.Formatting.dark(accent_color="#f43f5e")   # dark theme, rose accent
-formatting=fl.Formatting.corporate(width=fl.Width.FULL) # full-width corporate
+formatting=bn.Formatting.dark(accent_color="#f43f5e")   # dark theme, rose accent
+formatting=bn.Formatting.corporate(width=bn.Width.FULL) # full-width corporate
 ```
 
 ### Building from scratch
 
 ```python
-formatting=fl.Formatting(
+formatting=bn.Formatting(
     accent_color="#0369a1",
     bg_color="#f8fafc",
     surface_color="#e2e8f0",
@@ -467,7 +467,7 @@ formatting=fl.Formatting(
     text_color="#0f172a",
     muted_color="#64748b",
     radius="0.25rem",
-    width=fl.Width.NARROW,
+    width=bn.Width.NARROW,
 )
 ```
 
@@ -486,7 +486,7 @@ formatting=fl.Formatting(
 | `width` | `Width.MEDIUM` | Container max-width (`NARROW` / `MEDIUM` / `FULL` or raw CSS) |
 | `text_alignment` | `left` | Paragraph text alignment |
 
-`fl.Width` values: `NARROW` (768 px), `MEDIUM` (1200 px), `FULL` (100%).
+`bn.Width` values: `NARROW` (768 px), `MEDIUM` (1200 px), `FULL` (100%).
 
 ---
 
@@ -495,44 +495,44 @@ formatting=fl.Formatting(
 ### KPI dashboard with tabbed detail
 
 ```python
-import folio as fl
+import bulletin as bn
 
-fl.save_report(
-    fl.Blocks(
-        fl.Text("# Sales Analysis — 2023"),
+bn.save_report(
+    bn.Blocks(
+        bn.Text("# Sales Analysis — 2023"),
 
-        fl.Group(
-            fl.BigNumber("Total Revenue", "€ 1 260 000", change="+12.4%", is_upward_change=True),
-            fl.BigNumber("Units Sold",    "12 640",      change="+3.1%",  is_upward_change=True),
-            fl.BigNumber("Avg Margin",    "31.2 %",      change="-0.8%",  is_upward_change=False),
-            fl.BigNumber("Return Rate",   "8.0 %",       change="+0.2%",  is_upward_change=False),
+        bn.Group(
+            bn.BigNumber("Total Revenue", "€ 1 260 000", change="+12.4%", is_upward_change=True),
+            bn.BigNumber("Units Sold",    "12 640",      change="+3.1%",  is_upward_change=True),
+            bn.BigNumber("Avg Margin",    "31.2 %",      change="-0.8%",  is_upward_change=False),
+            bn.BigNumber("Return Rate",   "8.0 %",       change="+0.2%",  is_upward_change=False),
             columns=4,
         ),
 
-        fl.Alert("South region margin dropped below 25% in December.",
-                 level=fl.AlertLevel.WARNING, title="Action needed"),
+        bn.Alert("South region margin dropped below 25% in December.",
+                 level=bn.AlertLevel.WARNING, title="Action needed"),
 
-        fl.Select(
-            fl.Group(fl.DataTable(by_region, caption="Region summary"), columns=1, label="By Region"),
-            fl.Group(fl.DataTable(monthly,   caption="Monthly aggregates"), columns=1, label="Monthly"),
-            fl.Group(fl.DataTable(df,        caption="All transactions"), columns=1, label="Raw Data"),
+        bn.Select(
+            bn.Group(bn.DataTable(by_region, caption="Region summary"), columns=1, label="By Region"),
+            bn.Group(bn.DataTable(monthly,   caption="Monthly aggregates"), columns=1, label="Monthly"),
+            bn.Group(bn.DataTable(df,        caption="All transactions"), columns=1, label="Raw Data"),
         ),
 
-        fl.Text("## Column Profile"),
-        fl.DataProfile(df),
+        bn.Text("## Column Profile"),
+        bn.DataProfile(df),
 
-        fl.Text("## Interactive Explorer"),
-        fl.DataDive(df, x="revenue", y="margin_pct", color="region"),
+        bn.Text("## Interactive Explorer"),
+        bn.DataDive(df, x="revenue", y="margin_pct", color="region"),
 
-        fl.Toggle(
-            fl.Text("**Refresh cadence**: nightly at 02:00 UTC."),
-            fl.Code("SELECT * FROM sales WHERE date >= '2023-01-01'\n", language="sql"),
+        bn.Toggle(
+            bn.Text("**Refresh cadence**: nightly at 02:00 UTC."),
+            bn.Code("SELECT * FROM sales WHERE date >= '2023-01-01'\n", language="sql"),
             label="Methodology & sources",
         ),
     ),
     path="sales_2023.html",
     name="Sales Analysis — 2023",
-    formatting=fl.Formatting(accent_color="#0f766e"),
+    formatting=bn.Formatting(accent_color="#0f766e"),
 )
 ```
 
@@ -542,19 +542,19 @@ fl.save_report(
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import plotly.express as px
-import folio as fl
+import bulletin as bn
 
 fig_plotly = px.scatter(df, x="revenue", y="margin_pct", color="region")
 
 fig_mpl, ax = plt.subplots()
 ax.hist(df["revenue"].dropna(), bins=30)
 
-fl.save_report(
-    fl.Blocks(
-        fl.Text("# Chart comparison"),
-        fl.Group(
-            fl.Plot(fig_plotly, caption="Interactive (Plotly)"),
-            fl.Plot(fig_mpl,    caption="Static SVG (Matplotlib)"),
+bn.save_report(
+    bn.Blocks(
+        bn.Text("# Chart comparison"),
+        bn.Group(
+            bn.Plot(fig_plotly, caption="Interactive (Plotly)"),
+            bn.Plot(fig_mpl,    caption="Static SVG (Matplotlib)"),
             columns=2,
         ),
     ),
@@ -565,12 +565,12 @@ fl.save_report(
 ### Hiding methodology behind a toggle
 
 ```python
-fl.Toggle(
-    fl.Text("""
+bn.Toggle(
+    bn.Text("""
         **Data source**: internal data warehouse.
         **Contact**: analytics@example.com
     """),
-    fl.Code("SELECT date, region, revenue FROM dw.sales\n", language="sql"),
+    bn.Code("SELECT date, region, revenue FROM dw.sales\n", language="sql"),
     label="Methodology & sources",
 )
 ```
@@ -579,7 +579,7 @@ fl.Toggle(
 
 ```python
 # Each (region × channel) cell is a group of packed dots coloured by product
-fl.DataDive(df, x="region", y="channel", color="product", layout="tile")
+bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```
 
 ### Jupyter inline display
@@ -587,8 +587,8 @@ fl.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```python
 from IPython.display import HTML, display
 
-display(HTML(fl.stringify_report(
-    fl.Blocks(fl.Text("# Quick look"), fl.DataProfile(df)),
+display(HTML(bn.stringify_report(
+    bn.Blocks(bn.Text("# Quick look"), bn.DataProfile(df)),
     name="Quick look",
 )))
 ```

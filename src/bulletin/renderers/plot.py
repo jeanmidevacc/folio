@@ -3,7 +3,7 @@
 Detection strategy
 ------------------
 We use duck typing on the figure's module path rather than ``isinstance``
-checks so that folio never hard-imports any plotting library.  Only the
+checks so that bulletin never hard-imports any plotting library.  Only the
 library actually used is imported at render time.
 
 Library support summary
@@ -27,11 +27,11 @@ import re
 import typing as t
 import warnings
 
-from folio._error import FolioError
+from bulletin._error import BulletinError
 
 if t.TYPE_CHECKING:
-    from folio.blocks.asset import Plot
-    from folio.blocks.base import BaseBlock
+    from bulletin.blocks.asset import Plot
+    from bulletin.blocks.base import BaseBlock
 
 _SUPPORTED = {"altair", "bokeh", "matplotlib", "plotly"}
 
@@ -40,7 +40,7 @@ _SUPPORTED = {"altair", "bokeh", "matplotlib", "plotly"}
 
 
 def detect_library(fig: t.Any) -> str:
-    """Return the library name for *fig*, or raise :class:`~folio.FolioError`."""
+    """Return the library name for *fig*, or raise :class:`~bulletin.BulletinError`."""
     module = type(fig).__module__.split(".")[0]
 
     if module == "plotly":
@@ -53,7 +53,7 @@ def detect_library(fig: t.Any) -> str:
     if hasattr(fig, "savefig") or hasattr(fig, "get_figure"):
         return "matplotlib"
 
-    raise FolioError(
+    raise BulletinError(
         f"Unsupported figure type: {type(fig).__module__}.{type(fig).__qualname__!r}. "
         f"Supported libraries: {', '.join(sorted(_SUPPORTED))}."
     )
@@ -64,8 +64,8 @@ def detect_library(fig: t.Any) -> str:
 
 def scan_for_plots(root: BaseBlock) -> set[str]:
     """Walk *root* depth-first and return the set of libraries used in Plot blocks."""
-    from folio.blocks.asset import Plot as PlotBlock
-    from folio.blocks.base import ContainerBlock
+    from bulletin.blocks.asset import Plot as PlotBlock
+    from bulletin.blocks.base import ContainerBlock
 
     needed: set[str] = set()
     stack: list[BaseBlock] = [root]
@@ -75,7 +75,7 @@ def scan_for_plots(root: BaseBlock) -> set[str]:
         if isinstance(block, PlotBlock):
             try:
                 needed.add(detect_library(block.figure))
-            except FolioError:
+            except BulletinError:
                 pass  # surface the error properly at render time
         if isinstance(block, ContainerBlock):
             stack.extend(block.blocks)
@@ -107,7 +107,7 @@ def _plotlyjs_script() -> str:
         js = get_plotlyjs()
         return f"<script>{js}</script>"
     except ImportError as exc:
-        raise FolioError(
+        raise BulletinError(
             "plotly is not installed. Run: pip install plotly"
         ) from exc
 
@@ -140,7 +140,7 @@ def _render_plotly(fig: t.Any, responsive: bool) -> str:
     try:
         import plotly.io as pio
     except ImportError as exc:
-        raise FolioError("plotly is not installed. Run: pip install plotly") from exc
+        raise BulletinError("plotly is not installed. Run: pip install plotly") from exc
 
     return pio.to_html(
         fig,
@@ -154,7 +154,7 @@ def _render_altair(fig: t.Any, responsive: bool) -> str:
     try:
         import altair as alt  # noqa: F401
     except ImportError as exc:
-        raise FolioError("altair is not installed. Run: pip install altair") from exc
+        raise BulletinError("altair is not installed. Run: pip install altair") from exc
 
     warnings.warn(
         "Altair charts load Vega+VegaLite from cdn.jsdelivr.net. "
@@ -184,7 +184,7 @@ def _render_bokeh(fig: t.Any) -> str:
         from bokeh.embed import file_html
         from bokeh.resources import INLINE
     except ImportError as exc:
-        raise FolioError("bokeh is not installed. Run: pip install bokeh") from exc
+        raise BulletinError("bokeh is not installed. Run: pip install bokeh") from exc
 
     full_html = file_html(fig, resources=INLINE)
     b64 = base64.b64encode(full_html.encode("utf-8")).decode("ascii")
@@ -199,7 +199,7 @@ def _render_bokeh(fig: t.Any) -> str:
 
 
 def render_figure(block: Plot) -> str:
-    """Render a :class:`~folio.Plot` block to a self-contained HTML fragment."""
+    """Render a :class:`~bulletin.Plot` block to a self-contained HTML fragment."""
     fig = block.figure
 
     # Normalise Axes → Figure for matplotlib-compatible objects
@@ -208,9 +208,9 @@ def render_figure(block: Plot) -> str:
 
     try:
         lib = detect_library(fig)
-    except FolioError as exc:
+    except BulletinError as exc:
         return (
-            f'<div class="fl-placeholder">'
+            f'<div class="bn-placeholder">'
             f"⚠ {_html.escape(str(exc))}"
             f"</div>"
         )
@@ -225,16 +225,16 @@ def render_figure(block: Plot) -> str:
         elif lib == "bokeh":
             inner = _render_bokeh(fig)
         else:
-            inner = f'<div class="fl-placeholder">Unknown library: {lib}</div>'
-    except FolioError as exc:
-        return f'<div class="fl-placeholder">⚠ {_html.escape(str(exc))}</div>'
+            inner = f'<div class="bn-placeholder">Unknown library: {lib}</div>'
+    except BulletinError as exc:
+        return f'<div class="bn-placeholder">⚠ {_html.escape(str(exc))}</div>'
 
     caption_html = (
-        f'<figcaption class="fl-plot__caption">{_html.escape(block.caption)}</figcaption>'
+        f'<figcaption class="bn-plot__caption">{_html.escape(block.caption)}</figcaption>'
         if block.caption
         else ""
     )
-    return f'<figure class="fl-block fl-plot">{inner}{caption_html}</figure>'
+    return f'<figure class="bn-block bn-plot">{inner}{caption_html}</figure>'
 
 
 __all__ = ["detect_library", "get_runtime_scripts", "render_figure", "scan_for_plots"]

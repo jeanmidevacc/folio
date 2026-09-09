@@ -1,4 +1,4 @@
-"""HTML rendering engine for folio reports.
+"""HTML rendering engine for bulletin reports.
 
 Architecture
 ------------
@@ -22,21 +22,21 @@ from importlib.resources import files
 
 from jinja2 import Environment, PackageLoader
 
-from folio.blocks.asset import DataTable, Plot, Table
-from folio.blocks.base import BaseBlock
-from folio.blocks.data import DataDive, DataProfile
-from folio.blocks.layout import Blocks, Group, Select, SelectType, Toggle, VAlign
-from folio.blocks.text import Alert, BigNumber, Code, Formula, HTML, Text
-from folio.renderers.datadive import render_datadive
-from folio.renderers.formatting import Formatting
-from folio.renderers.normalize import normalize
-from folio.renderers.plot import get_runtime_scripts, render_figure, scan_for_plots
-from folio.renderers.profile import render_profile
-from folio.renderers.table import render_datatable, render_table
+from bulletin.blocks.asset import DataTable, Plot, Table
+from bulletin.blocks.base import BaseBlock
+from bulletin.blocks.data import DataDive, DataProfile
+from bulletin.blocks.layout import Blocks, Group, Select, SelectType, Toggle, VAlign
+from bulletin.blocks.text import Alert, BigNumber, Code, Formula, HTML, Text
+from bulletin.renderers.datadive import render_datadive
+from bulletin.renderers.formatting import Formatting
+from bulletin.renderers.normalize import normalize
+from bulletin.renderers.plot import get_runtime_scripts, render_figure, scan_for_plots
+from bulletin.renderers.profile import render_profile
+from bulletin.renderers.table import render_datatable, render_table
 
 # ── package resource loading ──────────────────────────────────────────────────
 
-_pkg = files("folio")
+_pkg = files("bulletin")
 
 
 def _load_static(name: str) -> str:
@@ -47,7 +47,7 @@ _CSS = _load_static("report.css")
 _JS = _load_static("report.js")
 
 _jinja_env = Environment(
-    loader=PackageLoader("folio", "templates"),
+    loader=PackageLoader("bulletin", "templates"),
     autoescape=False,  # we control all HTML; user HTML goes in via safe blocks
     keep_trailing_newline=True,
 )
@@ -62,7 +62,7 @@ class _IdGen:
     def __init__(self) -> None:
         self._counter = itertools.count(1)
 
-    def next(self, prefix: str = "fl") -> str:
+    def next(self, prefix: str = "bn") -> str:
         return f"{prefix}-{next(self._counter)}"
 
 
@@ -74,24 +74,24 @@ def _render_text(block: Text, _: _IdGen) -> str:
 
     md = MarkdownIt("commonmark")
     body = md.render(block.content)
-    return f'<div class="fl-block fl-text">{body}</div>'
+    return f'<div class="bn-block bn-text">{body}</div>'
 
 
 def _render_html(block: HTML, _: _IdGen) -> str:
-    return f'<div class="fl-block fl-html">{block.content}</div>'
+    return f'<div class="bn-block bn-html">{block.content}</div>'
 
 
 def _render_code(block: Code, _: _IdGen) -> str:
     lang = _html.escape(block.language)
     code = _html.escape(block.content)
-    header = f'<div class="fl-code__header"><span>{lang}</span></div>'
+    header = f'<div class="bn-code__header"><span>{lang}</span></div>'
     caption = (
-        f'<div class="fl-code__caption">{_html.escape(block.caption)}</div>'
+        f'<div class="bn-code__caption">{_html.escape(block.caption)}</div>'
         if block.caption
         else ""
     )
     return (
-        f'<div class="fl-block fl-code">'
+        f'<div class="bn-block bn-code">'
         f"{header}"
         f'<pre><code class="language-{lang}">{code}</code></pre>'
         f"{caption}"
@@ -102,13 +102,13 @@ def _render_code(block: Code, _: _IdGen) -> str:
 def _render_formula(block: Formula, _: _IdGen) -> str:
     content = _html.escape(block.content)
     caption = (
-        f'<div class="fl-formula__caption">{_html.escape(block.caption)}</div>'
+        f'<div class="bn-formula__caption">{_html.escape(block.caption)}</div>'
         if block.caption
         else ""
     )
     return (
-        f'<div class="fl-block fl-formula">'
-        f'<span class="fl-formula__content">\\({content}\\)</span>'
+        f'<div class="bn-block bn-formula">'
+        f'<span class="bn-formula__content">\\({content}\\)</span>'
         f"{caption}"
         f"</div>"
     )
@@ -123,15 +123,15 @@ def _render_bignumber(block: BigNumber, _: _IdGen) -> str:
         direction = "up" if block.is_upward_change else "down"
         arrow = "▲" if block.is_upward_change else "▼"
         change_html = (
-            f'<div class="fl-bignumber__change fl-bignumber__change--{direction}">'
+            f'<div class="bn-bignumber__change bn-bignumber__change--{direction}">'
             f"{arrow} {_html.escape(block.change)}"
             f"</div>"
         )
 
     return (
-        f'<div class="fl-block fl-bignumber">'
-        f'<div class="fl-bignumber__heading">{heading}</div>'
-        f'<div class="fl-bignumber__value">{value}</div>'
+        f'<div class="bn-block bn-bignumber">'
+        f'<div class="bn-bignumber__heading">{heading}</div>'
+        f'<div class="bn-bignumber__value">{value}</div>'
         f"{change_html}"
         f"</div>"
     )
@@ -140,14 +140,14 @@ def _render_bignumber(block: BigNumber, _: _IdGen) -> str:
 def _render_alert(block: Alert, _: _IdGen) -> str:
     level = block.level.value
     title_html = (
-        f'<div class="fl-alert__title">{_html.escape(block.title)}</div>'
+        f'<div class="bn-alert__title">{_html.escape(block.title)}</div>'
         if block.title
         else ""
     )
     return (
-        f'<div class="fl-block fl-alert fl-alert--{level}" role="alert">'
+        f'<div class="bn-block bn-alert bn-alert--{level}" role="alert">'
         f"{title_html}"
-        f'<div class="fl-alert__message">{_html.escape(block.message)}</div>'
+        f'<div class="bn-alert__message">{_html.escape(block.message)}</div>'
         f"</div>"
     )
 
@@ -159,12 +159,12 @@ def _render_group(block: Group, idgen: _IdGen) -> str:
         cols_css = " ".join(f"{w}fr" for w in block.widths)
         style = f'style="grid-template-columns: {cols_css};"'
     else:
-        style = f'style="--fl-cols: {block.columns};"'
+        style = f'style="--bn-cols: {block.columns};"'
 
     valign_cls = (
-        f" fl-group--valign-{block.valign}" if block.valign != VAlign.TOP else ""
+        f" bn-group--valign-{block.valign}" if block.valign != VAlign.TOP else ""
     )
-    return f'<div class="fl-block fl-group{valign_cls}" {style}>{inner}</div>'
+    return f'<div class="bn-block bn-group{valign_cls}" {style}>{inner}</div>'
 
 
 def _render_select(block: Select, idgen: _IdGen) -> str:
@@ -178,19 +178,19 @@ def _render_select(block: Select, idgen: _IdGen) -> str:
             panel_id = f"{uid}-panel-{i}"
             label = _html.escape(child.label or f"Tab {i + 1}")
             tabs_html += (
-                f'<button class="fl-select__tab" role="tab" '
+                f'<button class="bn-select__tab" role="tab" '
                 f'id="{tab_id}" aria-controls="{panel_id}">'
                 f"{label}</button>"
             )
             panel_html = _render_block(child, idgen)
             panels_html += (
-                f'<div class="fl-select__panel" role="tabpanel" '
+                f'<div class="bn-select__panel" role="tabpanel" '
                 f'id="{panel_id}" aria-labelledby="{tab_id}">'
                 f"{panel_html}</div>"
             )
         return (
-            f'<div class="fl-block fl-select" id="{uid}">'
-            f'<div class="fl-select__tablist" role="tablist">{tabs_html}</div>'
+            f'<div class="bn-block bn-select" id="{uid}">'
+            f'<div class="bn-select__tablist" role="tablist">{tabs_html}</div>'
             f"{panels_html}"
             f"</div>"
         )
@@ -202,10 +202,10 @@ def _render_select(block: Select, idgen: _IdGen) -> str:
             label = _html.escape(child.label or f"Option {i + 1}")
             options_html += f'<option value="{i}">{label}</option>'
             panel_html = _render_block(child, idgen)
-            panels_html += f'<div class="fl-select__panel">{panel_html}</div>'
+            panels_html += f'<div class="bn-select__panel">{panel_html}</div>'
         return (
-            f'<div class="fl-block fl-select fl-select--dropdown" id="{uid}">'
-            f'<select class="fl-select__select" aria-label="Select view">'
+            f'<div class="bn-block bn-select bn-select--dropdown" id="{uid}">'
+            f'<select class="bn-select__select" aria-label="Select view">'
             f"{options_html}</select>"
             f"{panels_html}"
             f"</div>"
@@ -217,19 +217,19 @@ def _render_toggle(block: Toggle, idgen: _IdGen) -> str:
     label = _html.escape(block.label or "Details")
     inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
     chevron = (
-        '<svg class="fl-toggle__icon" width="16" height="16" viewBox="0 0 20 20" '
+        '<svg class="bn-toggle__icon" width="16" height="16" viewBox="0 0 20 20" '
         'fill="currentColor" aria-hidden="true">'
         '<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938'
         "a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 "
         '01.02-1.06z" clip-rule="evenodd"/></svg>'
     )
     return (
-        f'<div class="fl-block fl-toggle" id="{uid}">'
-        f'<button class="fl-toggle__header" aria-expanded="false" '
+        f'<div class="bn-block bn-toggle" id="{uid}">'
+        f'<button class="bn-toggle__header" aria-expanded="false" '
         f'aria-controls="{uid}-body">'
         f"<span>{label}</span>{chevron}"
         f"</button>"
-        f'<div class="fl-toggle__body" id="{uid}-body" hidden>{inner}</div>'
+        f'<div class="bn-toggle__body" id="{uid}-body" hidden>{inner}</div>'
         f"</div>"
     )
 
@@ -257,7 +257,7 @@ def _render_datadive(block: DataDive, _: _IdGen) -> str:
 def _render_placeholder(block: BaseBlock, _: _IdGen) -> str:
     name = _html.escape(type(block).__name__)
     return (
-        f'<div class="fl-block fl-placeholder">'
+        f'<div class="bn-block bn-placeholder">'
         f"⚙ <strong>{name}</strong> — rendering implemented in a later phase."
         f"</div>"
     )
@@ -286,7 +286,7 @@ _DISPATCH: dict[type, object] = {
 def _render_block(block: BaseBlock, idgen: _IdGen) -> str:
     if isinstance(block, Blocks):
         inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
-        return f'<div class="fl-blocks">{inner}</div>'
+        return f'<div class="bn-blocks">{inner}</div>'
 
     renderer = _DISPATCH.get(type(block))
     if renderer is not None:

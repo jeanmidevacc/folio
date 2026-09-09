@@ -11,8 +11,8 @@ from __future__ import annotations
 
 import typing as t
 
-from folio._error import FolioError
-from folio.blocks.base import BaseBlock, BlockId, _MAX_CAPTION_LEN, _truncate
+from bulletin._error import BulletinError
+from bulletin.blocks.base import BaseBlock, BlockId, _MAX_CAPTION_LEN, _truncate
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -72,7 +72,7 @@ class Table(BaseBlock):
         try:
             import pandas as pd
         except ImportError as exc:
-            raise FolioError("Table requires pandas — install it with: pip install pandas") from exc
+            raise BulletinError("Table requires pandas — install it with: pip install pandas") from exc
 
         super().__init__(name=name, label=label)
         self.data = data
@@ -104,7 +104,7 @@ class DataTable(BaseBlock):
         try:
             import pandas as pd
         except ImportError as exc:
-            raise FolioError(
+            raise BulletinError(
                 "DataTable requires pandas — install it with: pip install pandas"
             ) from exc
 

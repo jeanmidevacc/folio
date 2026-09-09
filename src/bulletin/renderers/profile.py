@@ -15,7 +15,7 @@ import math
 import typing as t
 
 if t.TYPE_CHECKING:
-    from folio.blocks.data import DataProfile
+    from bulletin.blocks.data import DataProfile
 
 
 # ── column type detection ─────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ def _histogram_svg(series: t.Any) -> str:
     mn, mx = float(valid.min()), float(valid.max())
     if mn == mx:
         # Degenerate: single value — draw one full-height bar
-        bar = f'<rect x="0" y="0" width="{_SVG_W}" height="{_SVG_H}" fill="var(--fl-accent)" fill-opacity="0.65"/>'
+        bar = f'<rect x="0" y="0" width="{_SVG_W}" height="{_SVG_H}" fill="var(--bn-accent)" fill-opacity="0.65"/>'
         return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_SVG_W} {_SVG_H}">{bar}</svg>'
 
     # Bucket counts without numpy
@@ -96,7 +96,7 @@ def _histogram_svg(series: t.Any) -> str:
         x = i * bar_w + gap / 2
         y = _SVG_H - h
         w = bar_w - gap
-        bars += f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" fill="var(--fl-accent)" fill-opacity="0.65"/>'
+        bars += f'<rect x="{x:.2f}" y="{y:.2f}" width="{w:.2f}" height="{h:.2f}" fill="var(--bn-accent)" fill-opacity="0.65"/>'
 
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_SVG_W} {_SVG_H}">{bars}</svg>'
 
@@ -117,7 +117,7 @@ def _bar_chart_svg(top_values: list[tuple[str, int]]) -> str:
         bw = (count / max_count) * (_SVG_W - 2) if max_count else 0
         y = i * row_h + gap / 2
         h = row_h - gap
-        bars += f'<rect x="1" y="{y:.2f}" width="{bw:.2f}" height="{h:.2f}" fill="var(--fl-accent)" fill-opacity="0.65"/>'
+        bars += f'<rect x="1" y="{y:.2f}" width="{bw:.2f}" height="{h:.2f}" fill="var(--bn-accent)" fill-opacity="0.65"/>'
 
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_SVG_W} {_SVG_H}">{bars}</svg>'
 
@@ -139,10 +139,10 @@ def _datetime_range_svg(series: t.Any) -> str:
     dots = ""
     for t_val in ts[::step]:
         cx = 1 + (t_val - t_min) / rng * (_SVG_W - 2)
-        dots += f'<circle cx="{cx:.1f}" cy="{r}" r="1.5" fill="var(--fl-accent)" fill-opacity="0.5"/>'
+        dots += f'<circle cx="{cx:.1f}" cy="{r}" r="1.5" fill="var(--bn-accent)" fill-opacity="0.5"/>'
 
     # Baseline
-    baseline = f'<line x1="1" y1="{r}" x2="{_SVG_W - 1}" y2="{r}" stroke="var(--fl-border)" stroke-width="1"/>'
+    baseline = f'<line x1="1" y1="{r}" x2="{_SVG_W - 1}" y2="{r}" stroke="var(--bn-border)" stroke-width="1"/>'
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_SVG_W} {_SVG_H}">{baseline}{dots}</svg>'
 
 
@@ -162,12 +162,12 @@ def _column_card(
     dtype_str = _html.escape(str(series.dtype))
 
     # ── missing stat row
-    miss_cls = " fl-profile__missing--high" if missing_pct > missing_threshold else ""
+    miss_cls = " bn-profile__missing--high" if missing_pct > missing_threshold else ""
     miss_val = f"{_pct(missing, total)} ({missing:,})"
 
     stat_rows = [
         ("count", f"{total:,}"),
-        ("missing", f'<span class="fl-profile__stat-val{miss_cls}">{_html.escape(miss_val)}</span>'),
+        ("missing", f'<span class="bn-profile__stat-val{miss_cls}">{_html.escape(miss_val)}</span>'),
     ]
 
     chart_svg = ""
@@ -208,19 +208,19 @@ def _column_card(
     dl_inner = ""
     for key, val_html in stat_rows:
         dl_inner += (
-            f'<div class="fl-profile__stat-row">'
+            f'<div class="bn-profile__stat-row">'
             f'<dt>{_html.escape(key)}</dt>'
             f'<dd>{val_html}</dd>'
             f"</div>"
         )
 
-    chart_html = f'<div class="fl-profile__chart">{chart_svg}</div>' if chart_svg else ""
+    chart_html = f'<div class="bn-profile__chart">{chart_svg}</div>' if chart_svg else ""
 
     return (
-        f'<div class="fl-profile__card">'
-        f'<div class="fl-profile__col-name" title="{_html.escape(col)}">{_html.escape(col)}</div>'
-        f'<span class="fl-profile__dtype">{dtype_str}</span>'
-        f'<dl class="fl-profile__stats">{dl_inner}</dl>'
+        f'<div class="bn-profile__card">'
+        f'<div class="bn-profile__col-name" title="{_html.escape(col)}">{_html.escape(col)}</div>'
+        f'<span class="bn-profile__dtype">{dtype_str}</span>'
+        f'<dl class="bn-profile__stats">{dl_inner}</dl>'
         f"{chart_html}"
         f"</div>"
     )
@@ -230,13 +230,13 @@ def _column_card(
 
 
 def render_profile(block: DataProfile) -> str:
-    """Render a :class:`~folio.DataProfile` block to an HTML grid of column cards."""
+    """Render a :class:`~bulletin.DataProfile` block to an HTML grid of column cards."""
     df = block.df
     cards = "".join(
         _column_card(col, df[col], block.missing_threshold, block.max_categories)
         for col in df.columns
     )
-    return f'<div class="fl-block fl-profile">{cards}</div>'
+    return f'<div class="bn-block bn-profile">{cards}</div>'
 
 
 __all__ = ["render_profile"]

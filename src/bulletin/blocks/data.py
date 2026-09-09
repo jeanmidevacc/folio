@@ -4,14 +4,14 @@ DataProfile  — per-column statistics with inline SVG mini-charts.
 DataDive     — interactive dot explorer drawn with hand-rolled SVG + vanilla JS.
 
 The classes here define the public API surface; rendering logic lives in
-``folio/renderers/profile.py`` and ``folio/renderers/datadive.py``.
+``bulletin/renderers/profile.py`` and ``bulletin/renderers/datadive.py``.
 """
 from __future__ import annotations
 
 import typing as t
 
-from folio._error import FolioError
-from folio.blocks.base import BaseBlock, BlockId
+from bulletin._error import BulletinError
+from bulletin.blocks.base import BaseBlock, BlockId
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -21,7 +21,7 @@ def _require_pandas(block_name: str) -> None:
     try:
         import pandas  # noqa: F401
     except ImportError as exc:
-        raise FolioError(
+        raise BulletinError(
             f"{block_name} requires pandas — install it with: pip install pandas"
         ) from exc
 
@@ -53,7 +53,7 @@ class DataProfile(BaseBlock):
     ) -> None:
         _require_pandas("DataProfile")
         if not 0.0 <= missing_threshold <= 1.0:
-            raise FolioError("'missing_threshold' must be between 0.0 and 1.0.")
+            raise BulletinError("'missing_threshold' must be between 0.0 and 1.0.")
         super().__init__(name=name, label=label)
         self.df = df
         self.missing_threshold = missing_threshold
@@ -96,7 +96,7 @@ class DataDive(BaseBlock):
         import warnings
 
         if layout not in ("scatter", "tile"):
-            raise FolioError(f"DataDive: 'layout' must be 'scatter' or 'tile', got {layout!r}.")
+            raise BulletinError(f"DataDive: 'layout' must be 'scatter' or 'tile', got {layout!r}.")
 
         super().__init__(name=name, label=label)
 
@@ -114,7 +114,7 @@ class DataDive(BaseBlock):
             ("facet_row", facet_row), ("facet_col", facet_col),
         ]:
             if col_val is not None and col_val not in df.columns:
-                raise FolioError(
+                raise BulletinError(
                     f"DataDive: column {col_val!r} (passed as '{col_name}') "
                     f"not found in DataFrame. Available: {list(df.columns)}"
                 )
