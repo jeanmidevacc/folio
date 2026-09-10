@@ -16,10 +16,7 @@ Architecture
 from __future__ import annotations
 
 import html as _html
-import itertools
 import os
-import typing as t
-from collections.abc import Callable
 from datetime import UTC, datetime
 from importlib.resources import files
 
@@ -27,14 +24,20 @@ from jinja2 import Environment, PackageLoader
 
 from bulletin.blocks.asset import DataTable, Plot, Table
 from bulletin.blocks.base import Block
-from bulletin.blocks.data import DataDive, DataProfile
 from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle, VAlign
 from bulletin.blocks.text import HTML, Alert, BigNumber, Code, Formula, Text
-from bulletin.renderers.datadive import render_datadive
 from bulletin.renderers.formatting import Formatting
 from bulletin.renderers.normalize import normalize
 from bulletin.renderers.plot import get_runtime_scripts, render_figure, scan_for_plots
-from bulletin.renderers.profile import render_profile
+from bulletin.renderers.registry import (
+    IdGen as _IdGen,
+)
+from bulletin.renderers.registry import (
+    asset_js_for,
+    iter_blocks,
+    lookup_renderer,
+    renderer_for,
+)
 from bulletin.renderers.table import render_datatable, render_table
 
 # ── package resource loading ──────────────────────────────────────────────────
@@ -56,22 +59,14 @@ _jinja_env = Environment(
 )
 
 
-# ── ID generator ──────────────────────────────────────────────────────────────
-
-
-class _IdGen:
-    """Generates sequential DOM IDs that are unique within one render pass."""
-
-    def __init__(self) -> None:
-        self._counter = itertools.count(1)
-
-    def next(self, prefix: str = "bn") -> str:
-        return f"{prefix}-{next(self._counter)}"
-
-
 # ── block renderers ───────────────────────────────────────────────────────────
+#
+# Each is registered with the shared renderer registry via ``@renderer_for``.
+# ``bulletin.lab`` (and any other optional subpackage) registers its own blocks
+# the same way when imported.
 
 
+@renderer_for(Text)
 def _render_text(block: Text, _: _IdGen) -> str:
     from markdown_it import MarkdownIt
 
@@ -80,10 +75,12 @@ def _render_text(block: Text, _: _IdGen) -> str:
     return f'<div class="bn-block bn-text">{body}</div>'
 
 
+@renderer_for(HTML)
 def _render_html(block: HTML, _: _IdGen) -> str:
     return f'<div class="bn-block bn-html">{block.content}</div>'
 
 
+@renderer_for(Code)
 def _render_code(block: Code, _: _IdGen) -> str:
     lang = _html.escape(block.language)
     code = _html.escape(block.content)
@@ -102,6 +99,7 @@ def _render_code(block: Code, _: _IdGen) -> str:
     )
 
 
+@renderer_for(Formula)
 def _render_formula(block: Formula, _: _IdGen) -> str:
     content = _html.escape(block.content)
     caption = (
@@ -117,6 +115,7 @@ def _render_formula(block: Formula, _: _IdGen) -> str:
     )
 
 
+@renderer_for(BigNumber)
 def _render_bignumber(block: BigNumber, _: _IdGen) -> str:
     heading = _html.escape(str(block.heading))
     value = _html.escape(str(block.value))
@@ -140,6 +139,7 @@ def _render_bignumber(block: BigNumber, _: _IdGen) -> str:
     )
 
 
+@renderer_for(Alert)
 def _render_alert(block: Alert, _: _IdGen) -> str:
     level = block.level.value
     title_html = (
@@ -155,6 +155,7 @@ def _render_alert(block: Alert, _: _IdGen) -> str:
     )
 
 
+@renderer_for(Group)
 def _render_group(block: Group, idgen: _IdGen) -> str:
     inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
 
@@ -170,6 +171,7 @@ def _render_group(block: Group, idgen: _IdGen) -> str:
     return f'<div class="bn-block bn-group{valign_cls}" {style}>{inner}</div>'
 
 
+@renderer_for(Select)
 def _render_select(block: Select, idgen: _IdGen) -> str:
     uid = idgen.next("sel")
 
@@ -215,6 +217,7 @@ def _render_select(block: Select, idgen: _IdGen) -> str:
         )
 
 
+@renderer_for(Toggle)
 def _render_toggle(block: Toggle, idgen: _IdGen) -> str:
     uid = idgen.next("tog")
     label = _html.escape(block.label or "Details")
@@ -237,55 +240,36 @@ def _render_toggle(block: Toggle, idgen: _IdGen) -> str:
     )
 
 
+@renderer_for(Plot)
 def _render_plot(block: Plot, _: _IdGen) -> str:
     return render_figure(block)
 
 
+@renderer_for(Table)
 def _render_table(block: Table, _: _IdGen) -> str:
     return render_table(block)
 
 
+@renderer_for(DataTable)
 def _render_datatable(block: DataTable, _: _IdGen) -> str:
     return render_datatable(block)
 
 
-def _render_profile(block: DataProfile, _: _IdGen) -> str:
-    return render_profile(block)
-
-
-def _render_datadive(block: DataDive, _: _IdGen) -> str:
-    return render_datadive(block)
-
-
 def _render_placeholder(block: Block, _: _IdGen) -> str:
     name = _html.escape(type(block).__name__)
+    hint = (
+        " — install its subpackage (e.g. bulletin[lab])"
+        if type(block).__module__.startswith("bulletin.")
+        else ""
+    )
     return (
         f'<div class="bn-block bn-placeholder">'
-        f"⚙ <strong>{name}</strong> — rendering implemented in a later phase."
+        f"⚙ <strong>{name}</strong> has no registered renderer{hint}."
         f"</div>"
     )
 
 
 # ── dispatcher ────────────────────────────────────────────────────────────────
-
-_Renderer = Callable[[t.Any, _IdGen], str]
-
-_DISPATCH: dict[type[Block], _Renderer] = {
-    Text: _render_text,
-    HTML: _render_html,
-    Code: _render_code,
-    Formula: _render_formula,
-    BigNumber: _render_bignumber,
-    Alert: _render_alert,
-    Group: _render_group,
-    Select: _render_select,
-    Toggle: _render_toggle,
-    Plot: _render_plot,
-    Table: _render_table,
-    DataTable: _render_datatable,
-    DataProfile: _render_profile,
-    DataDive: _render_datadive,
-}
 
 
 def _render_block(block: Block, idgen: _IdGen) -> str:
@@ -293,7 +277,7 @@ def _render_block(block: Block, idgen: _IdGen) -> str:
         inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
         return f'<div class="bn-blocks">{inner}</div>'
 
-    renderer = _DISPATCH.get(type(block))
+    renderer = lookup_renderer(block)
     if renderer is not None:
         return renderer(block, idgen)
 
@@ -337,6 +321,15 @@ def render_report(
     libraries = scan_for_plots(normalised)
     head_scripts = get_runtime_scripts(libraries)
 
+    # Pre-pass: collect JS assets that optional blocks (e.g. bulletin.lab's
+    # DataDive) need, so the core report.js stays lean when they're unused.
+    extra_js: list[str] = []
+    for block in iter_blocks(normalised):
+        js = asset_js_for(block)
+        if js is not None and js not in extra_js:
+            extra_js.append(js)
+    report_js = "\n".join([_JS, *extra_js])
+
     idgen = _IdGen()
     content_html = _render_block(normalised, idgen)
 
@@ -349,7 +342,7 @@ def render_report(
         report_date_iso=now.isoformat(),
         css_vars=fmt.to_css_vars(),
         report_css=_CSS,
-        report_js=_JS,
+        report_js=report_js,
         head_scripts=head_scripts,
         content_html=content_html,
         show_header=name != "Report",

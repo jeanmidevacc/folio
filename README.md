@@ -26,9 +26,9 @@ report = bn.Bulletin(
     bn.Select(
         bn.Plot(fig, label="Trend"),
         bn.DataTable(df, label="Raw Data"),
-        bn.DataProfile(df, label="Profile"),
+        bn.lab.DataProfile(df, label="Profile"),
     ),
-    bn.DataDive(df),
+    bn.lab.DataDive(df),
 )
 
 bn.save(report, "q1_analysis.html")
@@ -37,20 +37,32 @@ bn.save(report, "q1_analysis.html")
 ## Features
 
 - **Self-contained HTML** — zero CDN, works offline forever
-- **Library-agnostic charts** — Plotly, Altair, Matplotlib, Bokeh
+- **Zero visualisation dependencies in the core** — the report grammar renders
+  with only Jinja2 + markdown-it-py. Charts are opt-in (see below).
+- **Bring-your-own-figure `Plot`** — hand it a Plotly, Altair, Matplotlib or
+  Bokeh figure; bulletin imports that library only when you pass its figure.
 - **Interactive tables** — sortable, searchable DataTable with client-side pagination
-- **Data profiling** — per-column stats with inline SVG mini-charts, no extra deps
-- **DataDive** — Facets Dive-style interactive dot explorer (Vega-Lite powered)
+- **`bulletin.lab`** — richer custom visualisations (`DataProfile` column stats,
+  `DataDive` Facets-style dot explorer), all hand-rolled SVG + vanilla JS, no CDN
 - **Themes** — five built-in presets plus full CSS token control
 - **Pandas 2.x** first-class support; PySpark via `.toPandas()`
 
 ## Installation
 
 ```bash
-pip install bulletin
-# with email support
-pip install bulletin[email]
+pip install bulletin                # core grammar + HTML renderer, no viz deps
 ```
+
+| Extra | Adds |
+| --- | --- |
+| `bulletin[pandas]` | pandas engine for `Table` / `DataTable` |
+| `bulletin[lab]` | `bulletin.lab` custom-visualisation blocks (`DataProfile`, `DataDive`) |
+| `bulletin[plotly]` `[altair]` `[bokeh]` `[matplotlib]` | the matching backend for `Plot` |
+| `bulletin[charts]` | all four `Plot` backends at once |
+| `bulletin[email]` | email-safe HTML + SMTP sending |
+
+`Plot` never imports a plotting library unless you actually pass it a figure from
+that library, so the extras only need to be installed for the backends you use.
 
 ---
 
@@ -242,7 +254,7 @@ Shows one child block at a time. Each child's `label` becomes the tab title.
 bn.Select(
     bn.Plot(fig, label="Chart"),
     bn.DataTable(df, label="Data"),
-    bn.DataProfile(df, label="Profile"),
+    bn.lab.DataProfile(df, label="Profile"),
     type=bn.SelectType.TABS,       # or bn.SelectType.DROPDOWN
 )
 ```
@@ -376,9 +388,9 @@ bn.DataTable(df, max_rows=500)   # cap at 500 rows
 
 ---
 
-### Data blocks
+### Lab blocks — `bulletin.lab`
 
-#### `bn.DataProfile` — Column statistics
+#### `bn.lab.DataProfile` — Column statistics
 
 Renders one card per column with dtype, missing %, and a mini-chart.
 
@@ -389,9 +401,9 @@ Renders one card per column with dtype, missing %, and a mini-chart.
 No extra dependencies — mini-charts are pure SVG.
 
 ```python
-bn.DataProfile(df)
-bn.DataProfile(df, missing_threshold=0.05)   # red highlight at >5% missing
-bn.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
+bn.lab.DataProfile(df)
+bn.lab.DataProfile(df, missing_threshold=0.05)   # red highlight at >5% missing
+bn.lab.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
 ```
 
 | Parameter | Type | Default | Description |
@@ -402,14 +414,14 @@ bn.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
 
 ---
 
-#### `bn.DataDive` — Interactive dot explorer
+#### `bn.lab.DataDive` — Interactive dot explorer
 
 Each DataFrame row becomes a dot. Dropdowns let the viewer dynamically change which columns drive X, Y, colour, and facets — similar to Google Facets Dive.
 
 ```python
-bn.DataDive(df)                                              # auto-selects axes
-bn.DataDive(df, x="revenue", y="margin_pct", color="region")
-bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
+bn.lab.DataDive(df)                                              # auto-selects axes
+bn.lab.DataDive(df, x="revenue", y="margin_pct", color="region")
+bn.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```
 
 | Parameter | Type | Default | Description |
@@ -519,10 +531,10 @@ bn.save(
         ),
 
         bn.Text("## Column Profile"),
-        bn.DataProfile(df),
+        bn.lab.DataProfile(df),
 
         bn.Text("## Interactive Explorer"),
-        bn.DataDive(df, x="revenue", y="margin_pct", color="region"),
+        bn.lab.DataDive(df, x="revenue", y="margin_pct", color="region"),
 
         bn.Toggle(
             bn.Text("**Refresh cadence**: nightly at 02:00 UTC."),
@@ -579,7 +591,7 @@ bn.Toggle(
 
 ```python
 # Each (region × channel) cell is a group of packed dots coloured by product
-bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
+bn.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```
 
 ### Jupyter inline display
@@ -588,7 +600,7 @@ bn.DataDive(df, x="region", y="channel", color="product", layout="tile")
 from IPython.display import HTML, display
 
 display(HTML(bn.stringify(
-    bn.Bulletin(bn.Text("# Quick look"), bn.DataProfile(df)),
+    bn.Bulletin(bn.Text("# Quick look"), bn.lab.DataProfile(df)),
     name="Quick look",
 )))
 ```

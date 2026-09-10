@@ -70,8 +70,8 @@ def test_data_blocks_accept_a_non_pandas_frame() -> None:
     tbl = pa.table({"x": [1, 2, 3, 4], "g": ["a", "a", "b", "b"]})
     # Each data block should normalise the input and expose a pandas frame.
     assert isinstance(bn.DataTable(tbl).df, pd.DataFrame)
-    assert isinstance(bn.DataProfile(tbl).df, pd.DataFrame)
-    assert isinstance(bn.DataDive(tbl).df, pd.DataFrame)
+    assert isinstance(bn.lab.DataProfile(tbl).df, pd.DataFrame)
+    assert isinstance(bn.lab.DataDive(tbl).df, pd.DataFrame)
     assert isinstance(bn.Table(tbl).data, pd.DataFrame)
 
 

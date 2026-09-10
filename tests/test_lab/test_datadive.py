@@ -7,9 +7,9 @@ import pandas as pd
 import pytest
 from bs4 import BeautifulSoup
 
-from bulletin.blocks.data import DataDive
 from bulletin.blocks.layout import Bulletin
-from bulletin.renderers.datadive import _col_kind, _pick_defaults, render_datadive
+from bulletin.lab import DataDive
+from bulletin.lab._render_datadive import _col_kind, _pick_defaults, render_datadive
 from bulletin.renderers.html import render_report
 
 # ── fixtures ──────────────────────────────────────────────────────────────────

@@ -19,7 +19,7 @@ import json
 import typing as t
 
 if t.TYPE_CHECKING:
-    from bulletin.blocks.data import DataDive
+    from bulletin.lab._blocks import DataDive
 
 
 # ── column classification ─────────────────────────────────────────────────────
