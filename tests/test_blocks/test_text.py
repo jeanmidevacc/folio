@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from bulletin._error import BulletinError
-from bulletin.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Formula, Text
+from briefing._error import BriefingError
+from briefing.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Formula, Text
 
 # ── Text ──────────────────────────────────────────────────────────────────────
 
@@ -41,17 +41,17 @@ class TestText:
         assert b.content == "file content"
 
     def test_file_not_found_raises(self, tmp_path: Path):
-        with pytest.raises(BulletinError, match="File not found"):
+        with pytest.raises(BriefingError, match="File not found"):
             Text(file=tmp_path / "nonexistent.md")
 
     def test_requires_text_or_file(self):
-        with pytest.raises(BulletinError):
+        with pytest.raises(BriefingError):
             Text()
 
     def test_text_and_file_together_raises(self, tmp_path: Path):
         md = tmp_path / "f.md"
         md.write_text("x")
-        with pytest.raises(BulletinError):
+        with pytest.raises(BriefingError):
             Text(text="hello", file=md)
 
     def test_name_and_label_stored(self):

@@ -3,15 +3,15 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-import bulletin as bn
-from bulletin.renderers.html import render_report
+import briefing as bf
+from briefing.renderers.html import render_report
 
 
-def _doc() -> bn.Bulletin:
-    return bn.Bulletin(
-        bn.Text("# Title"),
-        bn.Group(bn.BigNumber("A", 1), bn.BigNumber("B", 2), columns=2),
-        bn.Alert("note", level="info"),
+def _doc() -> bf.Briefing:
+    return bf.Briefing(
+        bf.Text("# Title"),
+        bf.Group(bf.BigNumber("A", 1), bf.BigNumber("B", 2), columns=2),
+        bf.Alert("note", level="info"),
     )
 
 

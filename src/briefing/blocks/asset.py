@@ -3,8 +3,8 @@
 These blocks hold external data (figures, DataFrames) and are serialised
 into the HTML as inline assets during the render pass.
 
-``Table`` / ``DataTable`` accept any dataframe library ``bulletin`` can
-normalise (see :mod:`bulletin._frames`); the data is stored internally as a
+``Table`` / ``DataTable`` accept any dataframe library ``briefing`` can
+normalise (see :mod:`briefing._frames`); the data is stored internally as a
 pandas DataFrame.
 """
 from __future__ import annotations
@@ -12,8 +12,8 @@ from __future__ import annotations
 import typing as t
 import warnings
 
-from bulletin._frames import is_pandas_dataframe, to_pandas
-from bulletin.blocks.base import _MAX_CAPTION_LEN, Block, BlockId, _truncate
+from briefing._frames import is_pandas_dataframe, to_pandas
+from briefing.blocks.base import _MAX_CAPTION_LEN, Block, BlockId, _truncate
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -60,8 +60,8 @@ class Table(Block):
 
     Example::
 
-        bn.Table(df)
-        bn.Table(df.style.highlight_max(color="lightgreen"))
+        bf.Table(df)
+        bf.Table(df.style.highlight_max(color="lightgreen"))
     """
 
     def __init__(

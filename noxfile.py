@@ -27,7 +27,7 @@ def lint(session: nox.Session) -> None:
 def typecheck(session: nox.Session) -> None:
     """Strict mypy over the package and the tests."""
     session.install("-e", ".[dev]")
-    session.run("mypy", "src/bulletin", "tests")
+    session.run("mypy", "src/briefing", "tests")
 
 
 @nox.session(python="3.11")

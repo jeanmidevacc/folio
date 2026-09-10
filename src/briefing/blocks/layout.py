@@ -1,4 +1,4 @@
-"""Layout and container blocks: Group, Select, Toggle, Page, Bulletin."""
+"""Layout and container blocks: Group, Select, Toggle, Page, Briefing."""
 from __future__ import annotations
 
 import typing as t
@@ -6,8 +6,8 @@ import warnings
 from collections.abc import Sequence
 from enum import StrEnum
 
-from bulletin._error import BulletinError
-from bulletin.blocks.base import BlockId, BlockOrPrimitive, ContainerBlock
+from briefing._error import BriefingError
+from briefing.blocks.base import BlockId, BlockOrPrimitive, ContainerBlock
 
 # ── enums ─────────────────────────────────────────────────────────────────────
 
@@ -51,7 +51,7 @@ class Group(ContainerBlock):
         label: str | None = None,
     ) -> None:
         if widths is not None and len(widths) != columns:
-            raise BulletinError(
+            raise BriefingError(
                 f"Group 'widths' length ({len(widths)}) must match 'columns' ({columns})."
             )
         super().__init__(*arg_blocks, blocks=blocks, name=name, label=label)
@@ -125,7 +125,7 @@ class Page(ContainerBlock):
 
     Example::
 
-        fl.Bulletin(
+        fl.Briefing(
             fl.Page(summary_group, title="Summary"),
             fl.Page(detail_group, title="Detail"),
         )
@@ -142,20 +142,20 @@ class Page(ContainerBlock):
     ) -> None:
         resolved = list(blocks if blocks is not None else arg_blocks)
         if any(isinstance(b, Page) for b in resolved):
-            raise BulletinError("Nested Page blocks are not supported — use Select and Group instead.")
+            raise BriefingError("Nested Page blocks are not supported — use Select and Group instead.")
         # label carries the title so the renderer can use it generically.
         super().__init__(*arg_blocks, blocks=blocks, name=name, label=title)
         self.title = title
 
 
-class Bulletin(ContainerBlock):
+class Briefing(ContainerBlock):
     """Root document container.
 
     This is the top-level object passed to ``save`` / ``send_email``.
 
     Example::
 
-        report = fl.Bulletin(
+        report = fl.Briefing(
             fl.Text("# My report"),
             fl.Plot(fig),
         )
@@ -169,23 +169,23 @@ class Bulletin(ContainerBlock):
         *arg_blocks: BlockOrPrimitive,
         blocks: Sequence[BlockOrPrimitive] | None = None,
     ) -> None:
-        # Unwrap if a single Bulletin is passed directly (avoids double-wrapping).
-        if len(arg_blocks) == 1 and isinstance(arg_blocks[0], Bulletin):
+        # Unwrap if a single Briefing is passed directly (avoids double-wrapping).
+        if len(arg_blocks) == 1 and isinstance(arg_blocks[0], Briefing):
             arg_blocks = tuple(arg_blocks[0].blocks)
         super().__init__(*arg_blocks, blocks=blocks)
 
     @classmethod
     def wrap(
         cls,
-        x: Bulletin | list[BlockOrPrimitive] | BlockOrPrimitive,
-    ) -> Bulletin:
-        """Coerce *x* into a ``Bulletin`` instance.
+        x: Briefing | list[BlockOrPrimitive] | BlockOrPrimitive,
+    ) -> Briefing:
+        """Coerce *x* into a ``Briefing`` instance.
 
-        - Already a ``Bulletin`` → returned unchanged.
-        - A ``list`` → unpacked into ``Bulletin(*x)``.
-        - Anything else → wrapped as ``Bulletin(x)``.
+        - Already a ``Briefing`` → returned unchanged.
+        - A ``list`` → unpacked into ``Briefing(*x)``.
+        - Anything else → wrapped as ``Briefing(x)``.
         """
-        if isinstance(x, Bulletin):
+        if isinstance(x, Briefing):
             return x
         if isinstance(x, list):
             return cls(*x)
@@ -195,7 +195,7 @@ class Bulletin(ContainerBlock):
 # ── public re-exports ─────────────────────────────────────────────────────────
 
 __all__: list[str] = [
-    "Bulletin",
+    "Briefing",
     "Group",
     "Page",
     "Select",

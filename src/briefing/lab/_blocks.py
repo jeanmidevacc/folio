@@ -1,20 +1,20 @@
-"""``bulletin.lab`` blocks: DataProfile, DataDive.
+"""``briefing.lab`` blocks: DataProfile, DataDive.
 
 DataProfile  — per-column statistics with inline SVG mini-charts.
 DataDive     — interactive dot explorer drawn with hand-rolled SVG + vanilla JS.
 
-These live in ``bulletin.lab`` (``pip install bulletin[lab]``) to keep the core
+These live in ``briefing.lab`` (``pip install briefing[lab]``) to keep the core
 grammar small. The classes here define the public API surface; rendering logic
-lives in ``bulletin/lab/_render_profile.py`` and ``bulletin/lab/_render_datadive.py``.
+lives in ``briefing/lab/_render_profile.py`` and ``briefing/lab/_render_datadive.py``.
 """
 from __future__ import annotations
 
 import typing as t
 import warnings
 
-from bulletin._error import BulletinError
-from bulletin._frames import to_pandas
-from bulletin.blocks.base import Block, BlockId
+from briefing._error import BriefingError
+from briefing._frames import to_pandas
+from briefing.blocks.base import Block, BlockId
 
 if t.TYPE_CHECKING:
     import pandas as pd
@@ -33,8 +33,8 @@ class DataProfile(Block):
 
     Example::
 
-        bn.lab.DataProfile(df)
-        bn.lab.DataProfile(df, missing_threshold=0.10)  # red at >10% missing
+        bf.lab.DataProfile(df)
+        bf.lab.DataProfile(df, missing_threshold=0.10)  # red at >10% missing
     """
 
     def __init__(
@@ -46,7 +46,7 @@ class DataProfile(Block):
         label: str | None = None,
     ) -> None:
         if not 0.0 <= missing_threshold <= 1.0:
-            raise BulletinError("'missing_threshold' must be between 0.0 and 1.0.")
+            raise BriefingError("'missing_threshold' must be between 0.0 and 1.0.")
         super().__init__(name=name, label=label)
         self.df = to_pandas(df, block="DataProfile")
         self.missing_threshold = missing_threshold
@@ -65,8 +65,8 @@ class DataDive(Block):
 
     Example::
 
-        bn.lab.DataDive(df)
-        bn.lab.DataDive(df, x="revenue", y="units", color="region", max_rows=5_000)
+        bf.lab.DataDive(df)
+        bf.lab.DataDive(df, x="revenue", y="units", color="region", max_rows=5_000)
     """
 
     #: DataFrames larger than this are sampled with a warning.
@@ -86,7 +86,7 @@ class DataDive(Block):
         label: str | None = None,
     ) -> None:
         if layout not in ("scatter", "tile"):
-            raise BulletinError(f"DataDive: 'layout' must be 'scatter' or 'tile', got {layout!r}.")
+            raise BriefingError(f"DataDive: 'layout' must be 'scatter' or 'tile', got {layout!r}.")
 
         super().__init__(name=name, label=label)
         df = to_pandas(df, block="DataDive")
@@ -105,7 +105,7 @@ class DataDive(Block):
             ("facet_row", facet_row), ("facet_col", facet_col),
         ]:
             if col_val is not None and col_val not in df.columns:
-                raise BulletinError(
+                raise BriefingError(
                     f"DataDive: column {col_val!r} (passed as '{col_name}') "
                     f"not found in DataFrame. Available: {list(df.columns)}"
                 )

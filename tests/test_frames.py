@@ -4,8 +4,8 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-import bulletin as bn
-from bulletin._frames import is_pandas_dataframe, looks_like_dataframe, to_pandas
+import briefing as bf
+from briefing._frames import is_pandas_dataframe, looks_like_dataframe, to_pandas
 
 
 def test_pandas_passthrough_is_identity() -> None:
@@ -44,8 +44,8 @@ def test_polars_like_object_uses_to_pandas() -> None:
     assert out["a"].tolist() == [9, 8]
 
 
-def test_unknown_object_raises_bulletin_error() -> None:
-    with pytest.raises(bn.BulletinError, match="could not turn"):
+def test_unknown_object_raises_briefing_error() -> None:
+    with pytest.raises(bf.BriefingError, match="could not turn"):
         to_pandas(object(), block="DataTable")
 
 
@@ -69,14 +69,14 @@ def test_data_blocks_accept_a_non_pandas_frame() -> None:
     pa = pytest.importorskip("pyarrow")
     tbl = pa.table({"x": [1, 2, 3, 4], "g": ["a", "a", "b", "b"]})
     # Each data block should normalise the input and expose a pandas frame.
-    assert isinstance(bn.DataTable(tbl).df, pd.DataFrame)
-    assert isinstance(bn.lab.DataProfile(tbl).df, pd.DataFrame)
-    assert isinstance(bn.lab.DataDive(tbl).df, pd.DataFrame)
-    assert isinstance(bn.Table(tbl).data, pd.DataFrame)
+    assert isinstance(bf.DataTable(tbl).df, pd.DataFrame)
+    assert isinstance(bf.lab.DataProfile(tbl).df, pd.DataFrame)
+    assert isinstance(bf.lab.DataDive(tbl).df, pd.DataFrame)
+    assert isinstance(bf.Table(tbl).data, pd.DataFrame)
 
 
 def test_wrap_block_auto_wraps_a_non_pandas_frame() -> None:
     pa = pytest.importorskip("pyarrow")
     tbl = pa.table({"x": [1, 2]})
-    report = bn.Bulletin(tbl)
+    report = bf.Briefing(tbl)
     assert type(report.blocks[0]).__name__ == "DataTable"

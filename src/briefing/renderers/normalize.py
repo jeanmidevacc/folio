@@ -2,25 +2,25 @@
 
 Transforms the block tree before HTML rendering:
 - Converts top-level ``Page`` blocks into a ``Select(TABS)`` of ``Group`` blocks.
-- Validates that the root ``Bulletin`` container is not empty.
+- Validates that the root ``Briefing`` container is not empty.
 """
 from __future__ import annotations
 
 import copy
 
-from bulletin._error import BulletinError
-from bulletin.blocks.layout import Bulletin, Group, Page, Select, SelectType
+from briefing._error import BriefingError
+from briefing.blocks.layout import Briefing, Group, Page, Select, SelectType
 
 
-def normalize(blocks: Bulletin) -> Bulletin:
+def normalize(blocks: Briefing) -> Briefing:
     """Return a normalized copy of *blocks*, ready for rendering.
 
     Mutations applied (in order):
 
-    1. **Empty root check** — raises :class:`~bulletin.BulletinError` if the root
-       ``Bulletin`` has zero children.
+    1. **Empty root check** — raises :class:`~briefing.BriefingError` if the root
+       ``Briefing`` has zero children.
     2. **Page → Select conversion** — if *all* top-level children are
-       :class:`~bulletin.Page` blocks they are converted to a single
+       :class:`~briefing.Page` blocks they are converted to a single
        ``Select(type=TABS)`` whose children are labelled ``Group`` blocks,
        one per page.  Mixed roots (some Pages, some non-Pages) raise an error.
     """
@@ -28,14 +28,14 @@ def normalize(blocks: Bulletin) -> Bulletin:
     root.blocks = list(blocks.blocks)  # shallow-copy the list
 
     if len(root.blocks) == 0:
-        raise BulletinError(
-            "Cannot render an empty Bulletin container — add at least one block."
+        raise BriefingError(
+            "Cannot render an empty Briefing container — add at least one block."
         )
 
     has_pages = [isinstance(b, Page) for b in root.blocks]
 
     if any(has_pages) and not all(has_pages):
-        raise BulletinError(
+        raise BriefingError(
             "Cannot mix Page blocks with other block types at the top level. "
             "Either wrap all content in Page blocks, or use none."
         )

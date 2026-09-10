@@ -1,7 +1,7 @@
 """Renderer registry — maps block classes to their HTML render functions.
 
 Core blocks register here at import time (``renderer_for`` decorators in
-``renderers/html.py``). Optional subpackages such as ``bulletin.lab`` register
+``renderers/html.py``). Optional subpackages such as ``briefing.lab`` register
 their own blocks when they are imported, and may attach a JS asset that the
 renderer inlines only when a block of that type is present.
 
@@ -15,7 +15,7 @@ import typing as t
 from collections.abc import Callable, Iterator
 
 if t.TYPE_CHECKING:
-    from bulletin.blocks.base import Block
+    from briefing.blocks.base import Block
 
 #: A renderer takes a block and the per-render ID generator, returns an HTML
 #: fragment. The block parameter is typed ``Any`` so concrete renderers may
@@ -30,7 +30,7 @@ class IdGen:
     def __init__(self) -> None:
         self._counter = itertools.count(1)
 
-    def next(self, prefix: str = "bn") -> str:
+    def next(self, prefix: str = "bf") -> str:
         return f"{prefix}-{next(self._counter)}"
 
 
@@ -81,7 +81,7 @@ def asset_js_for(block: Block) -> str | None:
 
 def iter_blocks(root: Block) -> Iterator[Block]:
     """Yield *root* and every descendant block, depth-first."""
-    from bulletin.blocks.base import ContainerBlock
+    from briefing.blocks.base import ContainerBlock
 
     stack: list[Block] = [root]
     while stack:

@@ -1,37 +1,37 @@
-# bulletin
+# briefing
 
 Build beautiful, self-contained HTML reports from Python analysis.
 
-## Why bulletin exists
+## Why briefing exists
 
 Two libraries shaped how I thought about sharing data science work:
 
 - **[datapane](https://github.com/datapane/datapane)** — the cleanest Python-native report builder I had ever used. Block-based, self-contained HTML output, dead-simple API. It was decommissioned in 2023 and the SaaS shut down shortly after.
 - **[Facets](https://github.com/PAIR-code/facets)** (PAIR / Google) — specifically *Facets Dive*, a brilliant interactive dot explorer that let you slice any dataset visually with zero configuration. The project went largely unmaintained and quietly disappeared from most data science workflows.
 
-I never found a substitute that matched either of them, let alone both at once. bulletin is my attempt to fill that gap: a datapane-style block and layout system with a Facets Dive-class explorer built in, fully offline, no cloud account required.
+I never found a substitute that matched either of them, let alone both at once. briefing is my attempt to fill that gap: a datapane-style block and layout system with a Facets Dive-class explorer built in, fully offline, no cloud account required.
 
-Building bulletin also serves a second purpose: it is a real-world, non-trivial Python project used to benchmark coding agents such as [Claude Code](https://github.com/anthropics/claude-code). Designing a library from original source code — with concept ofblock hierarchy, rendering pipeline, theming, interactive components — gives a coding agent enough surface area to show where it genuinely helps and where it still struggles.
+Building briefing also serves a second purpose: it is a real-world, non-trivial Python project used to benchmark coding agents such as [Claude Code](https://github.com/anthropics/claude-code). Designing a library from original source code — with concept ofblock hierarchy, rendering pipeline, theming, interactive components — gives a coding agent enough surface area to show where it genuinely helps and where it still struggles.
 
 ```python
-import bulletin as bn
+import briefing as bf
 
-report = bn.Bulletin(
-    bn.Text("# Sales Analysis — Q1 2024"),
-    bn.Group(
-        bn.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False),
-        bn.BigNumber("Active Users", "142K", change="+3%", is_upward_change=True),
+report = bf.Briefing(
+    bf.Text("# Sales Analysis — Q1 2024"),
+    bf.Group(
+        bf.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False),
+        bf.BigNumber("Active Users", "142K", change="+3%", is_upward_change=True),
         columns=2,
     ),
-    bn.Select(
-        bn.Plot(fig, label="Trend"),
-        bn.DataTable(df, label="Raw Data"),
-        bn.lab.DataProfile(df, label="Profile"),
+    bf.Select(
+        bf.Plot(fig, label="Trend"),
+        bf.DataTable(df, label="Raw Data"),
+        bf.lab.DataProfile(df, label="Profile"),
     ),
-    bn.lab.DataDive(df),
+    bf.lab.DataDive(df),
 )
 
-bn.save(report, "q1_analysis.html")
+bf.save(report, "q1_analysis.html")
 ```
 
 ## Features
@@ -40,9 +40,9 @@ bn.save(report, "q1_analysis.html")
 - **Zero visualisation dependencies in the core** — the report grammar renders
   with only Jinja2 + markdown-it-py. Charts are opt-in (see below).
 - **Bring-your-own-figure `Plot`** — hand it a Plotly, Altair, Matplotlib or
-  Bokeh figure; bulletin imports that library only when you pass its figure.
+  Bokeh figure; briefing imports that library only when you pass its figure.
 - **Interactive tables** — sortable, searchable DataTable with client-side pagination
-- **`bulletin.lab`** — richer custom visualisations (`DataProfile` column stats,
+- **`briefing.lab`** — richer custom visualisations (`DataProfile` column stats,
   `DataDive` Facets-style dot explorer), all hand-rolled SVG + vanilla JS, no CDN
 - **Themes** — five built-in presets plus full CSS token control
 - **Pandas 2.x** first-class support; PySpark via `.toPandas()`
@@ -50,16 +50,16 @@ bn.save(report, "q1_analysis.html")
 ## Installation
 
 ```bash
-pip install bulletin                # core grammar + HTML renderer, no viz deps
+pip install briefing                # core grammar + HTML renderer, no viz deps
 ```
 
 | Extra | Adds |
 | --- | --- |
-| `bulletin[pandas]` | pandas engine for `Table` / `DataTable` |
-| `bulletin[lab]` | `bulletin.lab` custom-visualisation blocks (`DataProfile`, `DataDive`) |
-| `bulletin[plotly]` `[altair]` `[bokeh]` `[matplotlib]` | the matching backend for `Plot` |
-| `bulletin[charts]` | all four `Plot` backends at once |
-| `bulletin[email]` | email-safe HTML + SMTP sending |
+| `briefing[pandas]` | pandas engine for `Table` / `DataTable` |
+| `briefing[lab]` | `briefing.lab` custom-visualisation blocks (`DataProfile`, `DataDive`) |
+| `briefing[plotly]` `[altair]` `[bokeh]` `[matplotlib]` | the matching backend for `Plot` |
+| `briefing[charts]` | all four `Plot` backends at once |
+| `briefing[email]` | email-safe HTML + SMTP sending |
 
 `Plot` never imports a plotting library unless you actually pass it a figure from
 that library, so the extras only need to be installed for the backends you use.
@@ -70,14 +70,14 @@ that library, so the extras only need to be installed for the backends you use.
 
 ```python
 import pandas as pd
-import bulletin as bn
+import briefing as bf
 
 df = pd.read_csv("sales.csv")
 
-bn.save(
-    bn.Bulletin(
-        bn.Text("# My Report"),
-        bn.DataTable(df),
+bf.save(
+    bf.Briefing(
+        bf.Text("# My Report"),
+        bf.DataTable(df),
     ),
     path="report.html",
     open=True,          # opens in browser immediately
@@ -89,18 +89,18 @@ To get an HTML string instead of writing a file (useful in Jupyter):
 ```python
 from IPython.display import HTML, display
 
-display(HTML(bn.stringify(bn.Bulletin(bn.Text("# Hello")))))
+display(HTML(bf.stringify(bf.Briefing(bf.Text("# Hello")))))
 ```
 
 ---
 
 ## API
 
-### `bn.save`
+### `bf.save`
 
 ```python
-bn.save(
-    blocks,                  # Bulletin, list, or a single block
+bf.save(
+    blocks,                  # Briefing, list, or a single block
     path,                    # destination file — e.g. "report.html"
     *,
     open=False,              # open in default browser after saving
@@ -109,10 +109,10 @@ bn.save(
 )
 ```
 
-### `bn.stringify`
+### `bf.stringify`
 
 ```python
-html: str = bn.stringify(
+html: str = bf.stringify(
     blocks,
     *,
     name="Report",
@@ -126,13 +126,13 @@ html: str = bn.stringify(
 
 ### Text blocks
 
-#### `bn.Text` — Markdown
+#### `bf.Text` — Markdown
 
 ```python
-bn.Text("# Heading\n\nSome **bold** and *italic* text.")
+bf.Text("# Heading\n\nSome **bold** and *italic* text.")
 
 # From a .md file
-bn.Text(file="notes.md")
+bf.Text(file="notes.md")
 ```
 
 | Parameter | Type | Description |
@@ -145,12 +145,12 @@ Supports headings, bold, italics, inline code, blockquotes, tables, and lists.
 
 ---
 
-#### `bn.Code` — Syntax-highlighted code
+#### `bf.Code` — Syntax-highlighted code
 
 ```python
-bn.Code("SELECT * FROM orders LIMIT 10", language="sql")
-bn.Code(
-    "import bulletin as bn\nfl.save(bn.Bulletin(bn.Text('# Hi')), 'out.html')",
+bf.Code("SELECT * FROM orders LIMIT 10", language="sql")
+bf.Code(
+    "import briefing as bf\nfl.save(bf.Briefing(bf.Text('# Hi')), 'out.html')",
     language="python",
     caption="Minimal report",
 )
@@ -164,10 +164,10 @@ bn.Code(
 
 ---
 
-#### `bn.Formula` — LaTeX equation
+#### `bf.Formula` — LaTeX equation
 
 ```python
-bn.Formula(r"\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i", caption="Sample mean")
+bf.Formula(r"\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i", caption="Sample mean")
 ```
 
 Rendered via MathJax (inlined in the report — no CDN needed).
@@ -179,21 +179,21 @@ Rendered via MathJax (inlined in the report — no CDN needed).
 
 ---
 
-#### `bn.HTML` — Raw HTML fragment
+#### `bf.HTML` — Raw HTML fragment
 
 ```python
-bn.HTML("<p style='color:#4F46E5'>Custom <strong>HTML</strong>.</p>")
+bf.HTML("<p style='color:#4F46E5'>Custom <strong>HTML</strong>.</p>")
 ```
 
 Rendered inside a sandboxed container — inline styles work, scripts are stripped.
 
 ---
 
-#### `bn.BigNumber` — KPI metric
+#### `bf.BigNumber` — KPI metric
 
 ```python
-bn.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False)
-bn.BigNumber("Accuracy", 0.924)   # no change indicator
+bf.BigNumber("Revenue", "$4.2M", change="-12%", is_upward_change=False)
+bf.BigNumber("Accuracy", 0.924)   # no change indicator
 ```
 
 | Parameter | Type | Default | Description |
@@ -207,12 +207,12 @@ bn.BigNumber("Accuracy", 0.924)   # no change indicator
 
 ---
 
-#### `bn.Alert` — Callout box
+#### `bf.Alert` — Callout box
 
 ```python
-bn.Alert("Pipeline completed successfully.", level=bn.AlertLevel.SUCCESS)
-bn.Alert("Margin erosion in South region.", level="warning", title="Watch")
-bn.Alert("Legacy source decommissioned.", level=bn.AlertLevel.ERROR, title="Breaking change")
+bf.Alert("Pipeline completed successfully.", level=bf.AlertLevel.SUCCESS)
+bf.Alert("Margin erosion in South region.", level="warning", title="Watch")
+bf.Alert("Legacy source decommissioned.", level=bf.AlertLevel.ERROR, title="Breaking change")
 ```
 
 | Parameter | Type | Default | Description |
@@ -221,19 +221,19 @@ bn.Alert("Legacy source decommissioned.", level=bn.AlertLevel.ERROR, title="Brea
 | `level` | `AlertLevel \| str` | `"info"` | One of `info`, `success`, `warning`, `error` |
 | `title` | `str` | `None` | Optional bold title above the message |
 
-`bn.AlertLevel` values: `INFO`, `SUCCESS`, `WARNING`, `ERROR`.
+`bf.AlertLevel` values: `INFO`, `SUCCESS`, `WARNING`, `ERROR`.
 
 ---
 
 ### Layout blocks
 
-#### `bn.Group` — Grid layout
+#### `bf.Group` — Grid layout
 
 Arranges child blocks in a responsive column grid.
 
 ```python
-bn.Group(plot_a, plot_b, columns=2)
-bn.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
+bf.Group(plot_a, plot_b, columns=2)
+bf.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
 ```
 
 | Parameter | Type | Default | Description |
@@ -246,16 +246,16 @@ bn.Group(a, b, c, columns=3, widths=[2, 1, 1])   # relative column widths
 
 ---
 
-#### `bn.Select` — Tabbed or dropdown panel switcher
+#### `bf.Select` — Tabbed or dropdown panel switcher
 
 Shows one child block at a time. Each child's `label` becomes the tab title.
 
 ```python
-bn.Select(
-    bn.Plot(fig, label="Chart"),
-    bn.DataTable(df, label="Data"),
-    bn.lab.DataProfile(df, label="Profile"),
-    type=bn.SelectType.TABS,       # or bn.SelectType.DROPDOWN
+bf.Select(
+    bf.Plot(fig, label="Chart"),
+    bf.DataTable(df, label="Data"),
+    bf.lab.DataProfile(df, label="Profile"),
+    type=bf.SelectType.TABS,       # or bf.SelectType.DROPDOWN
 )
 ```
 
@@ -268,14 +268,14 @@ bn.Select(
 
 ---
 
-#### `bn.Toggle` — Collapsible section
+#### `bf.Toggle` — Collapsible section
 
 Collapsed by default; click the label to expand.
 
 ```python
-bn.Toggle(
-    bn.Text("Methodology notes — hidden by default."),
-    bn.Code("SELECT * FROM sales\n", language="sql"),
+bf.Toggle(
+    bf.Text("Methodology notes — hidden by default."),
+    bf.Code("SELECT * FROM sales\n", language="sql"),
     label="Query details",
 )
 ```
@@ -287,14 +287,14 @@ bn.Toggle(
 
 ---
 
-#### `bn.Page` — Top-level page tab
+#### `bf.Page` — Top-level page tab
 
-Use at the root of `Bulletin` to create multi-page reports. Pages are converted to a top-level tab bar during rendering.
+Use at the root of `Briefing` to create multi-page reports. Pages are converted to a top-level tab bar during rendering.
 
 ```python
-bn.Bulletin(
-    bn.Page(summary_group, title="Summary"),
-    bn.Page(detail_group, title="Detail"),
+bf.Briefing(
+    bf.Page(summary_group, title="Summary"),
+    bf.Page(detail_group, title="Detail"),
 )
 ```
 
@@ -307,24 +307,24 @@ bn.Bulletin(
 
 ---
 
-#### `bn.Bulletin` — Root document container
+#### `bf.Briefing` — Root document container
 
 Top-level wrapper passed to `save`. Accepts any combination of blocks.
 
 ```python
-report = bn.Bulletin(
-    bn.Text("# My Report"),
-    bn.Plot(fig),
-    bn.DataTable(df),
+report = bf.Briefing(
+    bf.Text("# My Report"),
+    bf.Plot(fig),
+    bf.DataTable(df),
 )
-bn.save(report, "report.html")
+bf.save(report, "report.html")
 ```
 
 ---
 
 ### Asset blocks
 
-#### `bn.Plot` — Chart / figure
+#### `bf.Plot` — Chart / figure
 
 Library-agnostic chart block. Auto-detects the figure type at render time:
 
@@ -336,9 +336,9 @@ Library-agnostic chart block. Auto-detects the figure type at render time:
 | **Bokeh** | Inline resources |
 
 ```python
-bn.Plot(plotly_fig, caption="Revenue over time")
-bn.Plot(altair_chart, label="Chart", responsive=True)
-bn.Plot(mpl_fig, scale=1.5)
+bf.Plot(plotly_fig, caption="Revenue over time")
+bf.Plot(altair_chart, label="Chart", responsive=True)
+bf.Plot(mpl_fig, scale=1.5)
 ```
 
 | Parameter | Type | Default | Description |
@@ -350,13 +350,13 @@ bn.Plot(mpl_fig, scale=1.5)
 
 ---
 
-#### `bn.Table` — Static table (pandas Styler)
+#### `bf.Table` — Static table (pandas Styler)
 
 Best for formatted DataFrames where you want to preserve Styler rules.
 
 ```python
-bn.Table(df)
-bn.Table(
+bf.Table(df)
+bf.Table(
     df.style
       .format({"revenue": "€ {:,.0f}"})
       .bar(subset=["revenue"], color="#c7d2fe")
@@ -371,13 +371,13 @@ bn.Table(
 
 ---
 
-#### `bn.DataTable` — Interactive table
+#### `bf.DataTable` — Interactive table
 
 Sortable, searchable, paginated table. Handles large datasets gracefully.
 
 ```python
-bn.DataTable(df, caption="Full sales dataset")
-bn.DataTable(df, max_rows=500)   # cap at 500 rows
+bf.DataTable(df, caption="Full sales dataset")
+bf.DataTable(df, max_rows=500)   # cap at 500 rows
 ```
 
 | Parameter | Type | Default | Description |
@@ -388,9 +388,9 @@ bn.DataTable(df, max_rows=500)   # cap at 500 rows
 
 ---
 
-### Lab blocks — `bulletin.lab`
+### Lab blocks — `briefing.lab`
 
-#### `bn.lab.DataProfile` — Column statistics
+#### `bf.lab.DataProfile` — Column statistics
 
 Renders one card per column with dtype, missing %, and a mini-chart.
 
@@ -401,9 +401,9 @@ Renders one card per column with dtype, missing %, and a mini-chart.
 No extra dependencies — mini-charts are pure SVG.
 
 ```python
-bn.lab.DataProfile(df)
-bn.lab.DataProfile(df, missing_threshold=0.05)   # red highlight at >5% missing
-bn.lab.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
+bf.lab.DataProfile(df)
+bf.lab.DataProfile(df, missing_threshold=0.05)   # red highlight at >5% missing
+bf.lab.DataProfile(df, max_categories=10)        # cap top-N bars for categoricals
 ```
 
 | Parameter | Type | Default | Description |
@@ -414,14 +414,14 @@ bn.lab.DataProfile(df, max_categories=10)        # cap top-N bars for categorica
 
 ---
 
-#### `bn.lab.DataDive` — Interactive dot explorer
+#### `bf.lab.DataDive` — Interactive dot explorer
 
 Each DataFrame row becomes a dot. Dropdowns let the viewer dynamically change which columns drive X, Y, colour, and facets — similar to Google Facets Dive.
 
 ```python
-bn.lab.DataDive(df)                                              # auto-selects axes
-bn.lab.DataDive(df, x="revenue", y="margin_pct", color="region")
-bn.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
+bf.lab.DataDive(df)                                              # auto-selects axes
+bf.lab.DataDive(df, x="revenue", y="margin_pct", color="region")
+bf.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```
 
 | Parameter | Type | Default | Description |
@@ -444,11 +444,11 @@ Pass a `Formatting` instance to `save` to control the visual style.
 ### Built-in presets
 
 ```python
-bn.save(blocks, "out.html", formatting=bn.Formatting.dark())
-bn.save(blocks, "out.html", formatting=bn.Formatting.corporate())
-bn.save(blocks, "out.html", formatting=bn.Formatting.minimal())
-bn.save(blocks, "out.html", formatting=bn.Formatting.ocean())
-bn.save(blocks, "out.html", formatting=bn.Formatting.warm())
+bf.save(blocks, "out.html", formatting=bf.Formatting.dark())
+bf.save(blocks, "out.html", formatting=bf.Formatting.corporate())
+bf.save(blocks, "out.html", formatting=bf.Formatting.minimal())
+bf.save(blocks, "out.html", formatting=bf.Formatting.ocean())
+bf.save(blocks, "out.html", formatting=bf.Formatting.warm())
 ```
 
 | Preset | Description |
@@ -464,14 +464,14 @@ bn.save(blocks, "out.html", formatting=bn.Formatting.warm())
 Every preset accepts keyword overrides:
 
 ```python
-formatting=bn.Formatting.dark(accent_color="#f43f5e")   # dark theme, rose accent
-formatting=bn.Formatting.corporate(width=bn.Width.FULL) # full-width corporate
+formatting=bf.Formatting.dark(accent_color="#f43f5e")   # dark theme, rose accent
+formatting=bf.Formatting.corporate(width=bf.Width.FULL) # full-width corporate
 ```
 
 ### Building from scratch
 
 ```python
-formatting=bn.Formatting(
+formatting=bf.Formatting(
     accent_color="#0369a1",
     bg_color="#f8fafc",
     surface_color="#e2e8f0",
@@ -479,7 +479,7 @@ formatting=bn.Formatting(
     text_color="#0f172a",
     muted_color="#64748b",
     radius="0.25rem",
-    width=bn.Width.NARROW,
+    width=bf.Width.NARROW,
 )
 ```
 
@@ -498,7 +498,7 @@ formatting=bn.Formatting(
 | `width` | `Width.MEDIUM` | Container max-width (`NARROW` / `MEDIUM` / `FULL` or raw CSS) |
 | `text_alignment` | `left` | Paragraph text alignment |
 
-`bn.Width` values: `NARROW` (768 px), `MEDIUM` (1200 px), `FULL` (100%).
+`bf.Width` values: `NARROW` (768 px), `MEDIUM` (1200 px), `FULL` (100%).
 
 ---
 
@@ -507,44 +507,44 @@ formatting=bn.Formatting(
 ### KPI dashboard with tabbed detail
 
 ```python
-import bulletin as bn
+import briefing as bf
 
-bn.save(
-    bn.Bulletin(
-        bn.Text("# Sales Analysis — 2023"),
+bf.save(
+    bf.Briefing(
+        bf.Text("# Sales Analysis — 2023"),
 
-        bn.Group(
-            bn.BigNumber("Total Revenue", "€ 1 260 000", change="+12.4%", is_upward_change=True),
-            bn.BigNumber("Units Sold",    "12 640",      change="+3.1%",  is_upward_change=True),
-            bn.BigNumber("Avg Margin",    "31.2 %",      change="-0.8%",  is_upward_change=False),
-            bn.BigNumber("Return Rate",   "8.0 %",       change="+0.2%",  is_upward_change=False),
+        bf.Group(
+            bf.BigNumber("Total Revenue", "€ 1 260 000", change="+12.4%", is_upward_change=True),
+            bf.BigNumber("Units Sold",    "12 640",      change="+3.1%",  is_upward_change=True),
+            bf.BigNumber("Avg Margin",    "31.2 %",      change="-0.8%",  is_upward_change=False),
+            bf.BigNumber("Return Rate",   "8.0 %",       change="+0.2%",  is_upward_change=False),
             columns=4,
         ),
 
-        bn.Alert("South region margin dropped below 25% in December.",
-                 level=bn.AlertLevel.WARNING, title="Action needed"),
+        bf.Alert("South region margin dropped below 25% in December.",
+                 level=bf.AlertLevel.WARNING, title="Action needed"),
 
-        bn.Select(
-            bn.Group(bn.DataTable(by_region, caption="Region summary"), columns=1, label="By Region"),
-            bn.Group(bn.DataTable(monthly,   caption="Monthly aggregates"), columns=1, label="Monthly"),
-            bn.Group(bn.DataTable(df,        caption="All transactions"), columns=1, label="Raw Data"),
+        bf.Select(
+            bf.Group(bf.DataTable(by_region, caption="Region summary"), columns=1, label="By Region"),
+            bf.Group(bf.DataTable(monthly,   caption="Monthly aggregates"), columns=1, label="Monthly"),
+            bf.Group(bf.DataTable(df,        caption="All transactions"), columns=1, label="Raw Data"),
         ),
 
-        bn.Text("## Column Profile"),
-        bn.lab.DataProfile(df),
+        bf.Text("## Column Profile"),
+        bf.lab.DataProfile(df),
 
-        bn.Text("## Interactive Explorer"),
-        bn.lab.DataDive(df, x="revenue", y="margin_pct", color="region"),
+        bf.Text("## Interactive Explorer"),
+        bf.lab.DataDive(df, x="revenue", y="margin_pct", color="region"),
 
-        bn.Toggle(
-            bn.Text("**Refresh cadence**: nightly at 02:00 UTC."),
-            bn.Code("SELECT * FROM sales WHERE date >= '2023-01-01'\n", language="sql"),
+        bf.Toggle(
+            bf.Text("**Refresh cadence**: nightly at 02:00 UTC."),
+            bf.Code("SELECT * FROM sales WHERE date >= '2023-01-01'\n", language="sql"),
             label="Methodology & sources",
         ),
     ),
     path="sales_2023.html",
     name="Sales Analysis — 2023",
-    formatting=bn.Formatting(accent_color="#0f766e"),
+    formatting=bf.Formatting(accent_color="#0f766e"),
 )
 ```
 
@@ -554,19 +554,19 @@ bn.save(
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import plotly.express as px
-import bulletin as bn
+import briefing as bf
 
 fig_plotly = px.scatter(df, x="revenue", y="margin_pct", color="region")
 
 fig_mpl, ax = plt.subplots()
 ax.hist(df["revenue"].dropna(), bins=30)
 
-bn.save(
-    bn.Bulletin(
-        bn.Text("# Chart comparison"),
-        bn.Group(
-            bn.Plot(fig_plotly, caption="Interactive (Plotly)"),
-            bn.Plot(fig_mpl,    caption="Static SVG (Matplotlib)"),
+bf.save(
+    bf.Briefing(
+        bf.Text("# Chart comparison"),
+        bf.Group(
+            bf.Plot(fig_plotly, caption="Interactive (Plotly)"),
+            bf.Plot(fig_mpl,    caption="Static SVG (Matplotlib)"),
             columns=2,
         ),
     ),
@@ -577,12 +577,12 @@ bn.save(
 ### Hiding methodology behind a toggle
 
 ```python
-bn.Toggle(
-    bn.Text("""
+bf.Toggle(
+    bf.Text("""
         **Data source**: internal data warehouse.
         **Contact**: analytics@example.com
     """),
-    bn.Code("SELECT date, region, revenue FROM dw.sales\n", language="sql"),
+    bf.Code("SELECT date, region, revenue FROM dw.sales\n", language="sql"),
     label="Methodology & sources",
 )
 ```
@@ -591,7 +591,7 @@ bn.Toggle(
 
 ```python
 # Each (region × channel) cell is a group of packed dots coloured by product
-bn.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
+bf.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```
 
 ### Jupyter inline display
@@ -599,8 +599,8 @@ bn.lab.DataDive(df, x="region", y="channel", color="product", layout="tile")
 ```python
 from IPython.display import HTML, display
 
-display(HTML(bn.stringify(
-    bn.Bulletin(bn.Text("# Quick look"), bn.lab.DataProfile(df)),
+display(HTML(bf.stringify(
+    bf.Briefing(bf.Text("# Quick look"), bf.lab.DataProfile(df)),
     name="Quick look",
 )))
 ```

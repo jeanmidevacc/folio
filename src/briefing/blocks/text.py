@@ -6,8 +6,8 @@ import warnings
 from enum import StrEnum
 from pathlib import Path
 
-from bulletin._error import BulletinError
-from bulletin.blocks.base import _MAX_CAPTION_LEN, Block, BlockId, _truncate
+from briefing._error import BriefingError
+from briefing.blocks.base import _MAX_CAPTION_LEN, Block, BlockId, _truncate
 
 # ── embedded text base ───────────────────────────────────────────────────────
 
@@ -52,16 +52,16 @@ class Text(EmbeddedTextBlock):
         label: str | None = None,
     ) -> None:
         if not text and not file:
-            raise BulletinError("Text block requires either 'text' or 'file'.")
+            raise BriefingError("Text block requires either 'text' or 'file'.")
         if text and file:
-            raise BulletinError("Text block accepts 'text' or 'file', not both.")
+            raise BriefingError("Text block accepts 'text' or 'file', not both.")
 
         if text:
             content = textwrap.dedent(text).strip()
         else:
             path = Path(file).expanduser()  # type: ignore[arg-type]
             if not path.exists():
-                raise BulletinError(f"File not found: {path}")
+                raise BriefingError(f"File not found: {path}")
             content = path.read_text(encoding="utf-8")
 
         super().__init__(content=content, name=name, label=label)

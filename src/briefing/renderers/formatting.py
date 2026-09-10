@@ -1,4 +1,4 @@
-"""Formatting and theming configuration for bulletin reports."""
+"""Formatting and theming configuration for briefing reports."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -27,7 +27,7 @@ _WIDTH_CSS: dict[Width, str] = {
 
 @dataclass
 class Formatting:
-    """Controls the visual theme of a bulletin report.
+    """Controls the visual theme of a briefing report.
 
     All values are injected as CSS custom properties on ``:root``.  The full
     set of tokens maps to every visual decision in the built-in stylesheet —
@@ -101,16 +101,16 @@ class Formatting:
             w = self.width  # caller passed a raw CSS value like "60rem"
         return (
             ":root {\n"
-            f"  --bn-bg:         {self.bg_color};\n"
-            f"  --bn-accent:     {self.accent_color};\n"
-            f"  --bn-font:       {self.font};\n"
-            f"  --bn-max-width:  {w};\n"
-            f"  --bn-text-align: {self.text_alignment};\n"
-            f"  --bn-text:       {self.text_color};\n"
-            f"  --bn-muted:      {self.muted_color};\n"
-            f"  --bn-border:     {self.border_color};\n"
-            f"  --bn-surface:    {self.surface_color};\n"
-            f"  --bn-radius:     {self.radius};\n"
+            f"  --bf-bg:         {self.bg_color};\n"
+            f"  --bf-accent:     {self.accent_color};\n"
+            f"  --bf-font:       {self.font};\n"
+            f"  --bf-max-width:  {w};\n"
+            f"  --bf-text-align: {self.text_alignment};\n"
+            f"  --bf-text:       {self.text_color};\n"
+            f"  --bf-muted:      {self.muted_color};\n"
+            f"  --bf-border:     {self.border_color};\n"
+            f"  --bf-surface:    {self.surface_color};\n"
+            f"  --bf-radius:     {self.radius};\n"
             "}\n"
         )
 
