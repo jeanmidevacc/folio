@@ -25,6 +25,10 @@ import webbrowser
 from datetime import datetime
 from pathlib import Path
 
+# ── lab: custom-visualisation blocks (bulletin.lab.DataProfile / .DataDive) ───
+# Same wheel; importing it registers its renderers. `bulletin[lab]` only adds
+# the pandas dependency those blocks need at render time.
+from bulletin import lab
 from bulletin._error import BulletinError
 
 # ── blocks ────────────────────────────────────────────────────────────────────
@@ -36,8 +40,6 @@ from bulletin.blocks import (
     Block,
     Bulletin,
     Code,
-    DataDive,
-    DataProfile,
     DataTable,
     Formula,
     Group,
@@ -141,9 +143,8 @@ __all__: list[str] = [
     "DataTable",
     "Plot",
     "Table",
-    # blocks — data
-    "DataDive",
-    "DataProfile",
+    # custom-visualisation subpackage (bn.lab.DataProfile / bn.lab.DataDive)
+    "lab",
     # formatting
     "Formatting",
     "TextAlignment",
@@ -166,6 +167,9 @@ _RENAMED: dict[str, tuple[str, object]] = {
     "stringify_report": ("stringify", stringify),
 }
 
+#: names that moved into the bulletin.lab subpackage
+_MOVED_TO_LAB: frozenset[str] = frozenset({"DataProfile", "DataDive"})
+
 
 def __getattr__(name: str) -> t.Any:
     if name in _RENAMED:
@@ -177,4 +181,12 @@ def __getattr__(name: str) -> t.Any:
             stacklevel=2,
         )
         return obj
+    if name in _MOVED_TO_LAB:
+        warnings.warn(
+            f"bulletin.{name} moved to bulletin.lab.{name} (pip install bulletin[lab]) "
+            f"and will be removed after 0.2 — use bulletin.lab.{name}.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return getattr(lab, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

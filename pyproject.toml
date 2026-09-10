@@ -23,17 +23,33 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Visualization",
 ]
-# Core install is dataframe-library agnostic. Table/DataTable/DataProfile/
-# DataDive need pandas as the internal engine — `pip install bulletin[pandas]`
-# (other libraries are accepted as input and converted).
+# The core install has ZERO visualisation-library dependencies. It renders the
+# report grammar (Text, Table, BigNumber, layout, ...) with only Jinja2 +
+# markdown-it-py. Charts come from either the `Plot` block (bring your own
+# Plotly/Altair/Matplotlib/Bokeh figure — install the matching extra) or the
+# `bulletin.lab` custom-visualisation blocks (`pip install bulletin[lab]`).
+# Table/DataTable use pandas as the internal engine — `pip install bulletin[pandas]`
+# (other dataframe libraries are accepted as input and converted).
 dependencies = [
     "jinja2>=3.1",
     "markdown-it-py>=3.0",
 ]
 
 [project.optional-dependencies]
-# pip install bulletin[pandas]
+# pip install bulletin[pandas] — internal engine for Table / DataTable
 pandas = ["pandas>=2.0"]
+# pip install bulletin[lab] — bulletin.lab custom-visualisation blocks
+#   (DataProfile, DataDive). Pure-SVG today; grows here so the core grammar
+#   stays small.
+lab = ["pandas>=2.0"]
+# The `Plot` block is a bring-your-own-figure escape hatch. Install the plotting
+# library you actually use; bulletin never imports one unless you pass its figure.
+plotly = ["plotly>=5.0"]
+altair = ["altair>=5.0"]
+bokeh = ["bokeh>=3.0"]
+matplotlib = ["matplotlib>=3.7"]
+# pip install bulletin[charts] — every supported Plot backend at once
+charts = ["plotly>=5.0", "altair>=5.0", "bokeh>=3.0", "matplotlib>=3.7"]
 # pip install bulletin[email]
 email = [
     "premailer>=3.10",
@@ -52,6 +68,9 @@ dev = [
     "pandas>=2.0",
     "pandas-stubs>=2.0",
     "pyarrow>=15.0",
+    # exercised by the Plot renderer tests so the adapter branches are covered
+    "plotly>=5.0",
+    "matplotlib>=3.7",
 ]
 
 [tool.pytest.ini_options]
@@ -82,9 +101,12 @@ strict = true
 warn_return_any = true
 warn_unused_configs = true
 
-# Optional plotting / markdown libraries ship no type information.
+# Optional plotting / markdown libraries ship no (or partial) type information.
 [[tool.mypy.overrides]]
-module = ["plotly.*", "altair.*", "bokeh.*", "markdown_it.*", "bs4.*"]
+module = [
+    "plotly.*", "altair.*", "bokeh.*", "matplotlib.*", "seaborn.*", "plotnine.*",
+    "markdown_it.*", "bs4.*",
+]
 ignore_missing_imports = true
 
 # Tests: still type-checked, but pytest functions need not be annotated.

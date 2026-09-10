@@ -5,15 +5,15 @@ import pandas as pd
 import pytest
 from bs4 import BeautifulSoup
 
-from bulletin.blocks.data import DataProfile
 from bulletin.blocks.layout import Bulletin
-from bulletin.renderers.html import render_report
-from bulletin.renderers.profile import (
+from bulletin.lab import DataProfile
+from bulletin.lab._render_profile import (
     _bar_chart_svg,
     _detect_kind,
     _histogram_svg,
     render_profile,
 )
+from bulletin.renderers.html import render_report
 
 # ── fixtures ──────────────────────────────────────────────────────────────────
 

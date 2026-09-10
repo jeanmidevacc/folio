@@ -1,10 +1,11 @@
-"""Data analysis blocks: DataProfile, DataDive.
+"""``bulletin.lab`` blocks: DataProfile, DataDive.
 
 DataProfile  — per-column statistics with inline SVG mini-charts.
 DataDive     — interactive dot explorer drawn with hand-rolled SVG + vanilla JS.
 
-The classes here define the public API surface; rendering logic lives in
-``bulletin/renderers/profile.py`` and ``bulletin/renderers/datadive.py``.
+These live in ``bulletin.lab`` (``pip install bulletin[lab]``) to keep the core
+grammar small. The classes here define the public API surface; rendering logic
+lives in ``bulletin/lab/_render_profile.py`` and ``bulletin/lab/_render_datadive.py``.
 """
 from __future__ import annotations
 
@@ -32,8 +33,8 @@ class DataProfile(Block):
 
     Example::
 
-        bn.DataProfile(df)
-        bn.DataProfile(df, missing_threshold=0.10)  # red at >10% missing
+        bn.lab.DataProfile(df)
+        bn.lab.DataProfile(df, missing_threshold=0.10)  # red at >10% missing
     """
 
     def __init__(
@@ -64,8 +65,8 @@ class DataDive(Block):
 
     Example::
 
-        fl.DataDive(df)
-        fl.DataDive(df, x="revenue", y="units", color="region", max_rows=5_000)
+        bn.lab.DataDive(df)
+        bn.lab.DataDive(df, x="revenue", y="units", color="region", max_rows=5_000)
     """
 
     #: DataFrames larger than this are sampled with a warning.

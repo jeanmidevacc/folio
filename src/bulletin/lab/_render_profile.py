@@ -14,7 +14,7 @@ import html as _html
 import typing as t
 
 if t.TYPE_CHECKING:
-    from bulletin.blocks.data import DataProfile
+    from bulletin.lab._blocks import DataProfile
 
 
 # ── column type detection ─────────────────────────────────────────────────────

@@ -1,7 +1,9 @@
-"""bulletin.blocks — all block types re-exported from one place."""
+"""bulletin.blocks — core block types re-exported from one place.
+
+Custom-visualisation blocks (DataProfile, DataDive) live in ``bulletin.lab``.
+"""
 from bulletin.blocks.asset import DataTable, Plot, Table
 from bulletin.blocks.base import Block, BlockId, BlockOrPrimitive, ContainerBlock, wrap_block
-from bulletin.blocks.data import DataDive, DataProfile
 from bulletin.blocks.layout import Bulletin, Group, Page, Select, SelectType, Toggle, VAlign
 from bulletin.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Formula, Text
 
@@ -32,7 +34,4 @@ __all__: list[str] = [
     "DataTable",
     "Plot",
     "Table",
-    # data
-    "DataDive",
-    "DataProfile",
 ]
