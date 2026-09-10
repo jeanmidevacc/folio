@@ -6,7 +6,7 @@ name: Publish
 #
 # One-time setup on PyPI (and TestPyPI):
 #   Account → Publishing → Add a pending publisher
-#     PyPI project name:  bulletin
+#     PyPI project name:  briefing
 #     Owner:              jeanmidevacc
 #     Repository name:     folio
 #     Workflow filename:   publish.yml
@@ -34,7 +34,7 @@ jobs:
       - name: Tag must match package version
         if: github.event_name == 'release'
         run: |
-          version=$(grep -Po '^__version__ = "\K[^"]+' src/bulletin/__init__.py)
+          version=$(grep -Po '^__version__ = "\K[^"]+' src/briefing/__init__.py)
           tag="${GITHUB_REF_NAME#v}"
           echo "package version: $version   release tag: $tag"
           test "$version" = "$tag"
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/bulletin
+      url: https://pypi.org/p/briefing
     permissions:
       id-token: write
     steps:
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/bulletin
+      url: https://test.pypi.org/p/briefing
     permissions:
       id-token: write
     steps:

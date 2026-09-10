@@ -8,11 +8,11 @@ from __future__ import annotations
 import pytest
 from bs4 import BeautifulSoup
 
-import bulletin as bn
-from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle
-from bulletin.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Text
-from bulletin.renderers.formatting import Formatting, Width
-from bulletin.renderers.html import render_report
+import briefing as bf
+from briefing.blocks.layout import Briefing, Group, Select, SelectType, Toggle
+from briefing.blocks.text import HTML, Alert, AlertLevel, BigNumber, Code, Text
+from briefing.renderers.formatting import Formatting, Width
+from briefing.renderers.html import render_report
 
 # ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -21,12 +21,12 @@ def parse(html: str) -> BeautifulSoup:
     return BeautifulSoup(html, "html.parser")
 
 
-def render(blocks: Bulletin, **kwargs) -> BeautifulSoup:
+def render(blocks: Briefing, **kwargs) -> BeautifulSoup:
     return parse(render_report(blocks, **kwargs))
 
 
-def blocks(*args) -> Bulletin:
-    return Bulletin(*args)
+def blocks(*args) -> Briefing:
+    return Briefing(*args)
 
 
 # ── self-contained guarantee ──────────────────────────────────────────────────
@@ -64,11 +64,11 @@ class TestDocumentStructure:
 
     def test_header_shown_when_name_not_default(self):
         soup = render(blocks(Text("hi")), name="Sales Q1")
-        assert soup.find(class_="bn-report__header") is not None
+        assert soup.find(class_="bf-report__header") is not None
 
     def test_header_hidden_when_default_name(self):
         soup = render(blocks(Text("hi")), name="Report")
-        assert soup.find(class_="bn-report__header") is None
+        assert soup.find(class_="bf-report__header") is None
 
     def test_report_date_present_in_header(self):
         soup = render(blocks(Text("hi")), name="X")
@@ -77,12 +77,12 @@ class TestDocumentStructure:
     def test_css_in_style_tag(self):
         soup = render(blocks(Text("hi")))
         styles = soup.find_all("style")
-        assert any("bn-report" in s.text for s in styles)
+        assert any("bf-report" in s.text for s in styles)
 
     def test_js_in_script_tag(self):
         soup = render(blocks(Text("hi")))
         scripts = [s for s in soup.find_all("script") if not s.get("src")]
-        assert any("bn-select" in s.text for s in scripts)
+        assert any("bf-select" in s.text for s in scripts)
 
     def test_formatting_css_vars_injected(self):
         fmt = Formatting(accent_color="#ff0000")
@@ -111,7 +111,7 @@ class TestTextRendering:
 
     def test_wrapped_in_fl_text(self):
         soup = render(blocks(Text("hello")))
-        assert soup.find(class_="bn-text") is not None
+        assert soup.find(class_="bf-text") is not None
 
 
 # ── HTML block ────────────────────────────────────────────────────────────────
@@ -125,7 +125,7 @@ class TestHTMLRendering:
 
     def test_wrapped_in_fl_html(self):
         soup = render(blocks(HTML("<span>x</span>")))
-        assert soup.find(class_="bn-html") is not None
+        assert soup.find(class_="bf-html") is not None
 
 
 # ── Code block ────────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ class TestCodeRendering:
 
     def test_no_caption_when_none(self):
         soup = render(blocks(Code("x")))
-        assert soup.find(class_="bn-code__caption") is None
+        assert soup.find(class_="bf-code__caption") is None
 
 
 # ── BigNumber block ───────────────────────────────────────────────────────────
@@ -165,15 +165,15 @@ class TestBigNumberRendering:
 
     def test_upward_change_class(self):
         soup = render(blocks(BigNumber("x", 1, change="+5%", is_upward_change=True)))
-        assert soup.find(class_="bn-bignumber__change--up") is not None
+        assert soup.find(class_="bf-bignumber__change--up") is not None
 
     def test_downward_change_class(self):
         soup = render(blocks(BigNumber("x", 1, change="-5%", is_upward_change=False)))
-        assert soup.find(class_="bn-bignumber__change--down") is not None
+        assert soup.find(class_="bf-bignumber__change--down") is not None
 
     def test_no_change_element_when_absent(self):
         soup = render(blocks(BigNumber("x", 1)))
-        assert soup.find(class_="bn-bignumber__change") is None
+        assert soup.find(class_="bf-bignumber__change") is None
 
 
 # ── Alert block ───────────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@ class TestAlertRendering:
     @pytest.mark.parametrize("level", list(AlertLevel))
     def test_level_class_present(self, level: AlertLevel):
         soup = render(blocks(Alert("msg", level=level)))
-        assert soup.find(class_=f"bn-alert--{level.value}") is not None
+        assert soup.find(class_=f"bf-alert--{level.value}") is not None
 
     def test_message_rendered(self):
         soup = render(blocks(Alert("Something went wrong.")))
@@ -192,11 +192,11 @@ class TestAlertRendering:
     def test_title_rendered_when_set(self):
         soup = render(blocks(Alert("msg", title="Heads up")))
         assert "Heads up" in soup.get_text()
-        assert soup.find(class_="bn-alert__title") is not None
+        assert soup.find(class_="bf-alert__title") is not None
 
     def test_no_title_element_when_absent(self):
         soup = render(blocks(Alert("msg")))
-        assert soup.find(class_="bn-alert__title") is None
+        assert soup.find(class_="bf-alert__title") is None
 
 
 # ── Group block ───────────────────────────────────────────────────────────────
@@ -205,16 +205,16 @@ class TestAlertRendering:
 class TestGroupRendering:
     def test_fl_group_present(self):
         soup = render(blocks(Group(Text("a"), Text("b"), columns=2)))
-        assert soup.find(class_="bn-group") is not None
+        assert soup.find(class_="bf-group") is not None
 
     def test_column_count_in_style(self):
         soup = render(blocks(Group(Text("a"), Text("b"), columns=2)))
-        group = soup.find(class_="bn-group")
-        assert "--bn-cols: 2" in group.get("style", "")
+        group = soup.find(class_="bf-group")
+        assert "--bf-cols: 2" in group.get("style", "")
 
     def test_custom_widths_in_style(self):
         soup = render(blocks(Group(Text("a"), Text("b"), columns=2, widths=[3, 1])))
-        group = soup.find(class_="bn-group")
+        group = soup.find(class_="bf-group")
         assert "3fr" in group.get("style", "")
         assert "1fr" in group.get("style", "")
 
@@ -230,7 +230,7 @@ class TestSelectRendering:
     def test_tab_buttons_rendered(self):
         s = Select(Text("a", label="Tab A"), Text("b", label="Tab B"))
         soup = render(blocks(s))
-        tabs = soup.find_all(class_="bn-select__tab")
+        tabs = soup.find_all(class_="bf-select__tab")
         assert len(tabs) == 2
 
     def test_tab_labels_used(self):
@@ -243,7 +243,7 @@ class TestSelectRendering:
     def test_panels_rendered(self):
         s = Select(Text("content A", label="A"), Text("content B", label="B"))
         soup = render(blocks(s))
-        panels = soup.find_all(class_="bn-select__panel")
+        panels = soup.find_all(class_="bf-select__panel")
         assert len(panels) == 2
 
     def test_dropdown_select_element_present(self):
@@ -266,7 +266,7 @@ class TestSelectRendering:
 class TestToggleRendering:
     def test_toggle_header_present(self):
         soup = render(blocks(Toggle(Text("details"), label="Show more")))
-        assert soup.find(class_="bn-toggle__header") is not None
+        assert soup.find(class_="bf-toggle__header") is not None
 
     def test_label_in_header(self):
         soup = render(blocks(Toggle(Text("x"), label="Click me")))
@@ -274,11 +274,11 @@ class TestToggleRendering:
 
     def test_body_present(self):
         soup = render(blocks(Toggle(Text("inner content"), label="Toggle")))
-        assert soup.find(class_="bn-toggle__body") is not None
+        assert soup.find(class_="bf-toggle__body") is not None
 
     def test_aria_expanded_false_by_default(self):
         soup = render(blocks(Toggle(Text("x"), label="T")))
-        header = soup.find(class_="bn-toggle__header")
+        header = soup.find(class_="bf-toggle__header")
         assert header.get("aria-expanded") == "false"
 
 
@@ -287,52 +287,52 @@ class TestToggleRendering:
 
 class TestPublicAPI:
     def test_save_report_writes_file(self, tmp_path):
-        report = bn.Bulletin(bn.Text("# Hello"))
+        report = bf.Briefing(bf.Text("# Hello"))
         dest = tmp_path / "out.html"
-        bn.save(report, str(dest), name="Test")
+        bf.save(report, str(dest), name="Test")
         assert dest.exists()
         assert dest.stat().st_size > 0
         content = dest.read_text(encoding="utf-8")
         assert "<!DOCTYPE html>" in content
 
     def test_save_report_self_contained(self, tmp_path):
-        report = bn.Bulletin(bn.Text("hi"))
+        report = bf.Briefing(bf.Text("hi"))
         dest = tmp_path / "out.html"
-        bn.save(report, str(dest))
+        bf.save(report, str(dest))
         soup = parse(dest.read_text(encoding="utf-8"))
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")
 
     def test_stringify_report_returns_string(self):
-        report = bn.Bulletin(bn.Text("hello"))
-        result = bn.stringify(report)
+        report = bf.Briefing(bf.Text("hello"))
+        result = bf.stringify(report)
         assert isinstance(result, str)
         assert "<!DOCTYPE html>" in result
 
     def test_save_report_accepts_list(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save([bn.Text("a"), bn.Text("b")], str(dest))
+        bf.save([bf.Text("a"), bf.Text("b")], str(dest))
         assert dest.exists()
 
     def test_save_report_accepts_single_block(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save(bn.Text("solo"), str(dest))
+        bf.save(bf.Text("solo"), str(dest))
         assert dest.exists()
 
     def test_formatting_applied(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save(
-            bn.Bulletin(bn.Text("hi")),
+        bf.save(
+            bf.Briefing(bf.Text("hi")),
             str(dest),
-            formatting=bn.Formatting(accent_color="#cafe00"),
+            formatting=bf.Formatting(accent_color="#cafe00"),
         )
         assert "#cafe00" in dest.read_text(encoding="utf-8")
 
     def test_width_narrow_in_css(self, tmp_path):
         dest = tmp_path / "out.html"
-        bn.save(
-            bn.Bulletin(bn.Text("hi")),
+        bf.save(
+            bf.Briefing(bf.Text("hi")),
             str(dest),
-            formatting=bn.Formatting(width=Width.NARROW),
+            formatting=bf.Formatting(width=Width.NARROW),
         )
         assert "48rem" in dest.read_text(encoding="utf-8")

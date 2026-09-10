@@ -36,7 +36,7 @@ jobs:
           cache: pip
       - run: pip install -e ".[dev]"
       - run: ruff check src tests
-      - run: mypy src/bulletin tests
+      - run: mypy src/briefing tests
 
   package:
     runs-on: ubuntu-latest

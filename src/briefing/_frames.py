@@ -1,7 +1,7 @@
 """Dataframe intake — accept more than just pandas.
 
-``bulletin`` renders tables and profiles against a pandas DataFrame internally,
-but pandas is an optional extra (``pip install bulletin[pandas]``) and callers
+``briefing`` renders tables and profiles against a pandas DataFrame internally,
+but pandas is an optional extra (``pip install briefing[pandas]``) and callers
 should not be forced to use pandas as *their* dataframe library.
 
 :func:`to_pandas` normalises whatever a data block is handed into a pandas
@@ -24,19 +24,19 @@ from __future__ import annotations
 import contextlib
 import typing as t
 
-from bulletin._error import BulletinError
+from briefing._error import BriefingError
 
 if t.TYPE_CHECKING:
     import pandas as pd
 
-_INSTALL_HINT = "install it with:  pip install bulletin[pandas]"
+_INSTALL_HINT = "install it with:  pip install briefing[pandas]"
 
 
 def _import_pandas() -> t.Any:
     try:
         import pandas
     except ImportError as exc:  # pragma: no cover - exercised only without pandas
-        raise BulletinError(f"This block needs pandas — {_INSTALL_HINT}") from exc
+        raise BriefingError(f"This block needs pandas — {_INSTALL_HINT}") from exc
     return pandas
 
 
@@ -84,7 +84,7 @@ def to_pandas(obj: object, *, block: str = "This block") -> pd.DataFrame:
     if isinstance(obj, dict | list):
         return t.cast("pd.DataFrame", pandas.DataFrame(obj))
 
-    raise BulletinError(
+    raise BriefingError(
         f"{block} could not turn {type(obj).__module__}.{type(obj).__qualname__} "
         "into a table. Pass a pandas / polars / pyarrow DataFrame, an object "
         "implementing the dataframe interchange protocol, or a dict of columns."

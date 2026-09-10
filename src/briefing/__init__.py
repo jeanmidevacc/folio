@@ -1,23 +1,23 @@
-"""bulletin — build beautiful, self-contained HTML reports from Python analysis.
+"""briefing — build beautiful, self-contained HTML reports from Python analysis.
 
 Quick start::
 
-    import bulletin as bn
+    import briefing as bf
 
-    report = bn.Bulletin(
-        bn.Text("# My Analysis"),
-        bn.Group(
-            bn.BigNumber("Accuracy", "92.4%", change="+1.2%", is_upward_change=True),
-            bn.BigNumber("F1 Score", 0.89),
+    report = bf.Briefing(
+        bf.Text("# My Analysis"),
+        bf.Group(
+            bf.BigNumber("Accuracy", "92.4%", change="+1.2%", is_upward_change=True),
+            bf.BigNumber("F1 Score", 0.89),
             columns=2,
         ),
-        bn.Select(
-            bn.Plot(fig, label="Chart"),
-            bn.DataTable(df, label="Data"),
+        bf.Select(
+            bf.Plot(fig, label="Chart"),
+            bf.DataTable(df, label="Data"),
         ),
     )
 
-    bn.save(report, "analysis.html")
+    bf.save(report, "analysis.html")
 """
 import typing as t
 import warnings
@@ -25,20 +25,20 @@ import webbrowser
 from datetime import datetime
 from pathlib import Path
 
-# ── lab: custom-visualisation blocks (bulletin.lab.DataProfile / .DataDive) ───
-# Same wheel; importing it registers its renderers. `bulletin[lab]` only adds
+# ── lab: custom-visualisation blocks (briefing.lab.DataProfile / .DataDive) ───
+# Same wheel; importing it registers its renderers. `briefing[lab]` only adds
 # the pandas dependency those blocks need at render time.
-from bulletin import lab
-from bulletin._error import BulletinError
+from briefing import lab
+from briefing._error import BriefingError
 
 # ── blocks ────────────────────────────────────────────────────────────────────
-from bulletin.blocks import (
+from briefing.blocks import (
     HTML,
     Alert,
     AlertLevel,
     BigNumber,
     Block,
-    Bulletin,
+    Briefing,
     Code,
     DataTable,
     Formula,
@@ -55,16 +55,16 @@ from bulletin.blocks import (
 )
 
 # ── formatting ────────────────────────────────────────────────────────────────
-from bulletin.renderers.formatting import Formatting, TextAlignment, Width
+from briefing.renderers.formatting import Formatting, TextAlignment, Width
 
 # ── renderer ──────────────────────────────────────────────────────────────────
-from bulletin.renderers.html import render_report
+from briefing.renderers.html import render_report
 
 # ── public API ────────────────────────────────────────────────────────────────
 
 
 def save(
-    blocks: Bulletin | list[t.Any] | object,
+    blocks: Briefing | list[t.Any] | object,
     path: str,
     *,
     open: bool = False,  # noqa: A002
@@ -75,20 +75,20 @@ def save(
     """Save *blocks* as a self-contained HTML file at *path*.
 
     Args:
-        blocks: A :class:`~bulletin.Bulletin` instance, a list of blocks, or a
+        blocks: A :class:`~briefing.Briefing` instance, a list of blocks, or a
             single block.  Lists and single blocks are automatically wrapped.
         path: Destination file path (e.g. ``"report.html"``).
         open: Open the file in your default browser after saving.
         name: Document title shown in the browser tab and report header.
-        formatting: A :class:`~bulletin.Formatting` instance controlling the theme.
+        formatting: A :class:`~briefing.Formatting` instance controlling the theme.
         now: Pin the header timestamp for byte-reproducible output (see also the
             ``SOURCE_DATE_EPOCH`` environment variable).
 
     Example::
 
-        bn.save(report, "analysis.html", name="Q1 Analysis", open=True)
+        bf.save(report, "analysis.html", name="Q1 Analysis", open=True)
     """
-    wrapped = Bulletin.wrap(blocks)
+    wrapped = Briefing.wrap(blocks)
     html = render_report(wrapped, name=name, formatting=formatting, now=now)
     dest = Path(path)
     dest.write_text(html, encoding="utf-8")
@@ -97,7 +97,7 @@ def save(
 
 
 def stringify(
-    blocks: Bulletin | list[t.Any] | object,
+    blocks: Briefing | list[t.Any] | object,
     *,
     name: str = "Report",
     formatting: Formatting | None = None,
@@ -108,11 +108,11 @@ def stringify(
     Useful for inline display in Jupyter notebooks::
 
         from IPython.display import HTML, display
-        display(HTML(bn.stringify(report)))
+        display(HTML(bf.stringify(report)))
 
     Pass *now* (or set ``SOURCE_DATE_EPOCH``) for byte-reproducible output.
     """
-    wrapped = Bulletin.wrap(blocks)
+    wrapped = Briefing.wrap(blocks)
     return render_report(wrapped, name=name, formatting=formatting, now=now)
 
 
@@ -120,7 +120,7 @@ __version__ = "0.1.0"
 
 __all__: list[str] = [
     # error
-    "BulletinError",
+    "BriefingError",
     # blocks — text
     "Alert",
     "AlertLevel",
@@ -131,7 +131,7 @@ __all__: list[str] = [
     "Text",
     # blocks — layout
     "Block",
-    "Bulletin",
+    "Briefing",
     "Group",
     "Page",
     "Select",
@@ -143,7 +143,7 @@ __all__: list[str] = [
     "DataTable",
     "Plot",
     "Table",
-    # custom-visualisation subpackage (bn.lab.DataProfile / bn.lab.DataDive)
+    # custom-visualisation subpackage (bf.lab.DataProfile / bf.lab.DataDive)
     "lab",
     # formatting
     "Formatting",
@@ -161,13 +161,13 @@ __all__: list[str] = [
 
 #: old name -> (new name, object)
 _RENAMED: dict[str, tuple[str, object]] = {
-    "Blocks": ("Bulletin", Bulletin),
+    "Blocks": ("Briefing", Briefing),
     "BaseBlock": ("Block", Block),
     "save_report": ("save", save),
     "stringify_report": ("stringify", stringify),
 }
 
-#: names that moved into the bulletin.lab subpackage
+#: names that moved into the briefing.lab subpackage
 _MOVED_TO_LAB: frozenset[str] = frozenset({"DataProfile", "DataDive"})
 
 
@@ -175,16 +175,16 @@ def __getattr__(name: str) -> t.Any:
     if name in _RENAMED:
         new, obj = _RENAMED[name]
         warnings.warn(
-            f"bulletin.{name} is deprecated and will be removed after 0.2 — "
-            f"use bulletin.{new}.",
+            f"briefing.{name} is deprecated and will be removed after 0.2 — "
+            f"use briefing.{new}.",
             DeprecationWarning,
             stacklevel=2,
         )
         return obj
     if name in _MOVED_TO_LAB:
         warnings.warn(
-            f"bulletin.{name} moved to bulletin.lab.{name} (pip install bulletin[lab]) "
-            f"and will be removed after 0.2 — use bulletin.lab.{name}.",
+            f"briefing.{name} moved to briefing.lab.{name} (pip install briefing[lab]) "
+            f"and will be removed after 0.2 — use briefing.lab.{name}.",
             DeprecationWarning,
             stacklevel=2,
         )

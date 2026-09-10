@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for the bulletin test suite."""
+"""Shared pytest fixtures for the briefing test suite."""
 from __future__ import annotations
 
 import pandas as pd

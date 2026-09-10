@@ -32,22 +32,22 @@ _SCRIPT = textwrap.dedent(
             del sys.modules[_m]
 
     import datetime
-    import bulletin as bn
+    import briefing as bf
 
     for _m in {blocked!r}:
-        assert _m not in sys.modules, f"importing bulletin pulled in {{_m}}"
+        assert _m not in sys.modules, f"importing briefing pulled in {{_m}}"
 
-    report = bn.Bulletin(
-        bn.Text("# Offline report"),
-        bn.Group(
-            bn.BigNumber("Rows", 1234),
-            bn.BigNumber("Cols", 7),
+    report = bf.Briefing(
+        bf.Text("# Offline report"),
+        bf.Group(
+            bf.BigNumber("Rows", 1234),
+            bf.BigNumber("Cols", 7),
             columns=2,
         ),
-        bn.Alert("No plotting library installed — core still renders.", level="info"),
-        bn.Table({{"a": [1, 2, 3], "b": [4, 5, 6]}}),
+        bf.Alert("No plotting library installed — core still renders.", level="info"),
+        bf.Table({{"a": [1, 2, 3], "b": [4, 5, 6]}}),
     )
-    html = bn.stringify(report, now=datetime.datetime(2020, 1, 1))
+    html = bf.stringify(report, now=datetime.datetime(2020, 1, 1))
     assert "<table" in html
     assert "Offline report" in html
     print("OK", len(html))

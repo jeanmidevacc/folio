@@ -5,10 +5,10 @@ import pandas as pd
 import pytest
 from bs4 import BeautifulSoup
 
-from bulletin.blocks.asset import DataTable, Table
-from bulletin.blocks.layout import Bulletin
-from bulletin.renderers.html import render_report
-from bulletin.renderers.table import render_datatable, render_table
+from briefing.blocks.asset import DataTable, Table
+from briefing.blocks.layout import Briefing
+from briefing.renderers.html import render_report
+from briefing.renderers.table import render_datatable, render_table
 
 # ── fixtures ──────────────────────────────────────────────────────────────────
 
@@ -37,13 +37,13 @@ class TestRenderTable:
         html = render_table(Table(simple_df))
         soup = BeautifulSoup(html, "html.parser")
         outer = soup.find("div")
-        assert "bn-block" in outer["class"]
-        assert "bn-table" in outer["class"]
+        assert "bf-block" in outer["class"]
+        assert "bf-table" in outer["class"]
 
     def test_scroll_wrapper_present(self, simple_df):
         html = render_table(Table(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="bn-table__scroll") is not None
+        assert soup.find("div", class_="bf-table__scroll") is not None
 
     def test_column_headers(self, simple_df):
         html = render_table(Table(simple_df))
@@ -60,14 +60,14 @@ class TestRenderTable:
     def test_caption_rendered(self, simple_df):
         html = render_table(Table(simple_df, caption="My Table"))
         soup = BeautifulSoup(html, "html.parser")
-        cap = soup.find("div", class_="bn-table__caption")
+        cap = soup.find("div", class_="bf-table__caption")
         assert cap is not None
         assert "My Table" in cap.text
 
     def test_no_caption_when_empty(self, simple_df):
         html = render_table(Table(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="bn-table__caption") is None
+        assert soup.find("div", class_="bf-table__caption") is None
 
     def test_caption_escaped(self, simple_df):
         html = render_table(Table(simple_df, caption="<script>alert(1)</script>"))
@@ -98,30 +98,30 @@ class TestRenderDataTable:
     def test_returns_datatable_div(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        outer = soup.find("div", class_="bn-datatable")
+        outer = soup.find("div", class_="bf-datatable")
         assert outer is not None
 
     def test_fl_block_class(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        outer = soup.find("div", class_="bn-datatable")
-        assert "bn-block" in outer["class"]
+        outer = soup.find("div", class_="bf-datatable")
+        assert "bf-block" in outer["class"]
 
     def test_search_input_present(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("input", class_="bn-dt__search") is not None
+        assert soup.find("input", class_="bf-dt__search") is not None
 
     def test_pagination_buttons_present(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        btns = soup.find_all("button", class_="bn-dt__page-btn")
+        btns = soup.find_all("button", class_="bf-dt__page-btn")
         assert len(btns) == 2
 
     def test_column_headers_with_data_col(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        ths = soup.find_all("th", class_="bn-dt__th")
+        ths = soup.find_all("th", class_="bf-dt__th")
         assert len(ths) == 2  # no named index → 2 columns
         cols = [int(th["data-col"]) for th in ths]
         assert cols == [0, 1]
@@ -140,14 +140,14 @@ class TestRenderDataTable:
     def test_caption_rendered(self, simple_df):
         html = render_datatable(DataTable(simple_df, caption="Interactive!"))
         soup = BeautifulSoup(html, "html.parser")
-        cap = soup.find("div", class_="bn-dt__caption")
+        cap = soup.find("div", class_="bf-dt__caption")
         assert cap is not None
         assert "Interactive!" in cap.text
 
     def test_no_caption_when_empty(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="bn-dt__caption") is None
+        assert soup.find("div", class_="bf-dt__caption") is None
 
     def test_caption_escaped(self, simple_df):
         html = render_datatable(DataTable(simple_df, caption='<img src="x" onerror="alert(1)">'))
@@ -158,14 +158,14 @@ class TestRenderDataTable:
     def test_named_index_shown(self, named_index_df):
         html = render_datatable(DataTable(named_index_df))
         soup = BeautifulSoup(html, "html.parser")
-        ths = soup.find_all("th", class_="bn-dt__th")
+        ths = soup.find_all("th", class_="bf-dt__th")
         assert len(ths) == 2  # index + 'val'
         assert ths[0].get_text(strip=True) == "row"
 
     def test_rangeindex_hidden(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        ths = soup.find_all("th", class_="bn-dt__th")
+        ths = soup.find_all("th", class_="bf-dt__th")
         labels = [th.get_text(strip=True) for th in ths]
         assert "a" in labels
         assert "b" in labels
@@ -198,7 +198,7 @@ class TestRenderDataTable:
     def test_sort_icon_span_present(self, simple_df):
         html = render_datatable(DataTable(simple_df))
         soup = BeautifulSoup(html, "html.parser")
-        icons = soup.find_all("span", class_="bn-dt__sort-icon")
+        icons = soup.find_all("span", class_="bf-dt__sort-icon")
         assert len(icons) == 2
 
     def test_xss_in_cell_data(self):
@@ -213,17 +213,17 @@ class TestRenderDataTable:
 
 class TestTableInReport:
     def test_datatable_in_report(self, simple_df):
-        html = render_report(Bulletin(DataTable(simple_df)))
+        html = render_report(Briefing(DataTable(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="bn-datatable") is not None
+        assert soup.find("div", class_="bf-datatable") is not None
 
     def test_table_in_report(self, simple_df):
-        html = render_report(Bulletin(Table(simple_df)))
+        html = render_report(Briefing(Table(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
-        assert soup.find("div", class_="bn-table") is not None
+        assert soup.find("div", class_="bf-table") is not None
 
     def test_no_external_resources(self, simple_df):
-        html = render_report(Bulletin(DataTable(simple_df)))
+        html = render_report(Briefing(DataTable(simple_df)))
         soup = BeautifulSoup(html, "html.parser")
         for tag in soup.find_all(src=True):
             assert not str(tag.get("src", "")).startswith("http")

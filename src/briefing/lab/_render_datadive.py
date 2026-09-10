@@ -19,7 +19,7 @@ import json
 import typing as t
 
 if t.TYPE_CHECKING:
-    from bulletin.lab._blocks import DataDive
+    from briefing.lab._blocks import DataDive
 
 
 # ── column classification ─────────────────────────────────────────────────────
@@ -82,11 +82,11 @@ def _serialise(df: t.Any) -> str:
 
 
 def render_datadive(block: DataDive) -> str:
-    """Render a :class:`~bulletin.DataDive` block to a self-contained interactive SVG explorer."""
+    """Render a :class:`~briefing.DataDive` block to a self-contained interactive SVG explorer."""
     df = block.df
     cols = list(df.columns)
     if not cols:
-        return '<div class="bn-block bn-placeholder">⚠ DataDive: no columns to display.</div>'
+        return '<div class="bf-block bf-placeholder">⚠ DataDive: no columns to display.</div>'
 
     # Column metadata for the JS scale engine
     meta = {col: _col_kind(df[col]) for col in cols}
@@ -111,8 +111,8 @@ def render_datadive(block: DataDive) -> str:
 
     def _control(axis: str, label: str, option_html: str) -> str:
         return (
-            f'<label class="bn-dd__ctrl">{label}'
-            f'<select class="bn-dd__sel" data-axis="{axis}">{option_html}</select>'
+            f'<label class="bf-dd__ctrl">{label}'
+            f'<select class="bf-dd__sel" data-axis="{axis}">{option_html}</select>'
             f"</label>"
         )
 
@@ -128,7 +128,7 @@ def render_datadive(block: DataDive) -> str:
         y_option_html = none_option + _options(y_def)
 
     controls = (
-        '<div class="bn-dd__controls">'
+        '<div class="bf-dd__controls">'
         + _control("x", x_label, _options_required(x_def))
         + _control("y", y_label, y_option_html)
         + _control("color", "Color", none_option + _options(color_def))
@@ -142,15 +142,15 @@ def render_datadive(block: DataDive) -> str:
     aria = f"DataDive {layout} plot"
 
     return (
-        f'<div class="bn-block bn-datadive" data-layout="{layout}">'
+        f'<div class="bf-block bf-datadive" data-layout="{layout}">'
         f"{controls}"
-        f'<div class="bn-dd__plot-area">'
-        f'<svg class="bn-dd__plot" viewBox="{vb}" aria-label="{aria}"></svg>'
-        f'<div class="bn-dd__tooltip" hidden></div>'
+        f'<div class="bf-dd__plot-area">'
+        f'<svg class="bf-dd__plot" viewBox="{vb}" aria-label="{aria}"></svg>'
+        f'<div class="bf-dd__tooltip" hidden></div>'
         f"</div>"
-        f'<div class="bn-dd__footer">{n_rows:,} rows</div>'
-        f'<script type="application/json" class="bn-dd__data">{data_json}</script>'
-        f'<script type="application/json" class="bn-dd__meta">{meta_json}</script>'
+        f'<div class="bf-dd__footer">{n_rows:,} rows</div>'
+        f'<script type="application/json" class="bf-dd__data">{data_json}</script>'
+        f'<script type="application/json" class="bf-dd__meta">{meta_json}</script>'
         f"</div>"
     )
 

@@ -4,10 +4,10 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from bulletin._error import BulletinError
-from bulletin.blocks.asset import DataTable
-from bulletin.blocks.base import ContainerBlock, wrap_block
-from bulletin.blocks.text import Text
+from briefing._error import BriefingError
+from briefing.blocks.asset import DataTable
+from briefing.blocks.base import ContainerBlock, wrap_block
+from briefing.blocks.text import Text
 
 # ── Block ─────────────────────────────────────────────────────────────────
 
@@ -38,7 +38,7 @@ class TestBaseBlock:
         ],
     )
     def test_invalid_name_raises(self, bad_name):
-        with pytest.raises(BulletinError, match="Invalid block name"):
+        with pytest.raises(BriefingError, match="Invalid block name"):
             Text("hello", name=bad_name)
 
     def test_label_stored_as_is_when_short(self):
@@ -124,9 +124,9 @@ class TestWrapBlock:
         assert isinstance(result, DataTable)
 
     def test_unsupported_type_raises(self):
-        with pytest.raises(BulletinError, match="Cannot auto-wrap"):
+        with pytest.raises(BriefingError, match="Cannot auto-wrap"):
             wrap_block(42)
 
     def test_unsupported_type_includes_type_name(self):
-        with pytest.raises(BulletinError, match="int"):
+        with pytest.raises(BriefingError, match="int"):
             wrap_block(42)

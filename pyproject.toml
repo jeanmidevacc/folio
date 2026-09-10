@@ -5,14 +5,14 @@ requires = ["hatchling>=1.21,<1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "src/bulletin/__init__.py"
+path = "src/briefing/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/bulletin"]
+packages = ["src/briefing"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "src/bulletin",
+    "src/briefing",
     "tests",
     "README.md",
     "CHANGELOG.md",
@@ -22,13 +22,14 @@ include = [
 ]
 
 [project]
-name = "bulletin"
+name = "briefing"
 dynamic = ["version"]
 description = "Build beautiful self-contained HTML reports from Python analysis"
 readme = "README.md"
 requires-python = ">=3.11"
-# Kept as a text table (not the PEP 639 SPDX string) so the built metadata stays
-# at version 2.2 — `twine check` and older toolchains choke on metadata 2.4/2.5.
+# Kept as a text table (not the PEP 639 SPDX string) — combined with the
+# hatchling<1.27 pin this keeps the built metadata at version 2.3, which
+# `twine check` and older install toolchains still accept (2.4/2.5 they reject).
 license = { text = "Apache-2.0" }
 authors = [{ name = "jeanmidevacc" }]
 keywords = ["data", "reporting", "html", "pandas", "polars", "visualization"]
@@ -47,8 +48,8 @@ classifiers = [
 # report grammar (Text, Table, BigNumber, layout, ...) with only Jinja2 +
 # markdown-it-py. Charts come from either the `Plot` block (bring your own
 # Plotly/Altair/Matplotlib/Bokeh figure — install the matching extra) or the
-# `bulletin.lab` custom-visualisation blocks (`pip install bulletin[lab]`).
-# Table/DataTable use pandas as the internal engine — `pip install bulletin[pandas]`
+# `briefing.lab` custom-visualisation blocks (`pip install briefing[lab]`).
+# Table/DataTable use pandas as the internal engine — `pip install briefing[pandas]`
 # (other dataframe libraries are accepted as input and converted).
 dependencies = [
     "jinja2>=3.1",
@@ -62,26 +63,26 @@ Issues = "https://github.com/jeanmidevacc/folio/issues"
 Changelog = "https://github.com/jeanmidevacc/folio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-# pip install bulletin[pandas] — internal engine for Table / DataTable
+# pip install briefing[pandas] — internal engine for Table / DataTable
 pandas = ["pandas>=2.0"]
-# pip install bulletin[lab] — bulletin.lab custom-visualisation blocks
+# pip install briefing[lab] — briefing.lab custom-visualisation blocks
 #   (DataProfile, DataDive). Pure-SVG today; grows here so the core grammar
 #   stays small.
 lab = ["pandas>=2.0"]
 # The `Plot` block is a bring-your-own-figure escape hatch. Install the plotting
-# library you actually use; bulletin never imports one unless you pass its figure.
+# library you actually use; briefing never imports one unless you pass its figure.
 plotly = ["plotly>=5.0"]
 altair = ["altair>=5.0"]
 bokeh = ["bokeh>=3.0"]
 matplotlib = ["matplotlib>=3.7"]
-# pip install bulletin[charts] — every supported Plot backend at once
+# pip install briefing[charts] — every supported Plot backend at once
 charts = ["plotly>=5.0", "altair>=5.0", "bokeh>=3.0", "matplotlib>=3.7"]
-# pip install bulletin[email]
+# pip install briefing[email]
 email = [
     "premailer>=3.10",
     "kaleido>=0.2",
 ]
-# pip install bulletin[dev]
+# pip install briefing[dev]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
@@ -101,10 +102,10 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=bulletin --cov-report=term-missing -v"
+addopts = "--cov=briefing --cov-report=term-missing -v"
 
 [tool.coverage.run]
-source = ["src/bulletin"]
+source = ["src/briefing"]
 omit = ["*/tests/*"]
 
 [tool.ruff]

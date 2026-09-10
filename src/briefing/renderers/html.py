@@ -1,4 +1,4 @@
-"""HTML rendering engine for bulletin reports.
+"""HTML rendering engine for briefing reports.
 
 Architecture
 ------------
@@ -22,27 +22,27 @@ from importlib.resources import files
 
 from jinja2 import Environment, PackageLoader
 
-from bulletin.blocks.asset import DataTable, Plot, Table
-from bulletin.blocks.base import Block
-from bulletin.blocks.layout import Bulletin, Group, Select, SelectType, Toggle, VAlign
-from bulletin.blocks.text import HTML, Alert, BigNumber, Code, Formula, Text
-from bulletin.renderers.formatting import Formatting
-from bulletin.renderers.normalize import normalize
-from bulletin.renderers.plot import get_runtime_scripts, render_figure, scan_for_plots
-from bulletin.renderers.registry import (
+from briefing.blocks.asset import DataTable, Plot, Table
+from briefing.blocks.base import Block
+from briefing.blocks.layout import Briefing, Group, Select, SelectType, Toggle, VAlign
+from briefing.blocks.text import HTML, Alert, BigNumber, Code, Formula, Text
+from briefing.renderers.formatting import Formatting
+from briefing.renderers.normalize import normalize
+from briefing.renderers.plot import get_runtime_scripts, render_figure, scan_for_plots
+from briefing.renderers.registry import (
     IdGen as _IdGen,
 )
-from bulletin.renderers.registry import (
+from briefing.renderers.registry import (
     asset_js_for,
     iter_blocks,
     lookup_renderer,
     renderer_for,
 )
-from bulletin.renderers.table import render_datatable, render_table
+from briefing.renderers.table import render_datatable, render_table
 
 # ── package resource loading ──────────────────────────────────────────────────
 
-_pkg = files("bulletin")
+_pkg = files("briefing")
 
 
 def _load_static(name: str) -> str:
@@ -53,7 +53,7 @@ _CSS = _load_static("report.css")
 _JS = _load_static("report.js")
 
 _jinja_env = Environment(
-    loader=PackageLoader("bulletin", "templates"),
+    loader=PackageLoader("briefing", "templates"),
     autoescape=False,  # we control all HTML; user HTML goes in via safe blocks
     keep_trailing_newline=True,
 )
@@ -62,7 +62,7 @@ _jinja_env = Environment(
 # ── block renderers ───────────────────────────────────────────────────────────
 #
 # Each is registered with the shared renderer registry via ``@renderer_for``.
-# ``bulletin.lab`` (and any other optional subpackage) registers its own blocks
+# ``briefing.lab`` (and any other optional subpackage) registers its own blocks
 # the same way when imported.
 
 
@@ -72,26 +72,26 @@ def _render_text(block: Text, _: _IdGen) -> str:
 
     md = MarkdownIt("commonmark")
     body = md.render(block.content)
-    return f'<div class="bn-block bn-text">{body}</div>'
+    return f'<div class="bf-block bf-text">{body}</div>'
 
 
 @renderer_for(HTML)
 def _render_html(block: HTML, _: _IdGen) -> str:
-    return f'<div class="bn-block bn-html">{block.content}</div>'
+    return f'<div class="bf-block bf-html">{block.content}</div>'
 
 
 @renderer_for(Code)
 def _render_code(block: Code, _: _IdGen) -> str:
     lang = _html.escape(block.language)
     code = _html.escape(block.content)
-    header = f'<div class="bn-code__header"><span>{lang}</span></div>'
+    header = f'<div class="bf-code__header"><span>{lang}</span></div>'
     caption = (
-        f'<div class="bn-code__caption">{_html.escape(block.caption)}</div>'
+        f'<div class="bf-code__caption">{_html.escape(block.caption)}</div>'
         if block.caption
         else ""
     )
     return (
-        f'<div class="bn-block bn-code">'
+        f'<div class="bf-block bf-code">'
         f"{header}"
         f'<pre><code class="language-{lang}">{code}</code></pre>'
         f"{caption}"
@@ -103,13 +103,13 @@ def _render_code(block: Code, _: _IdGen) -> str:
 def _render_formula(block: Formula, _: _IdGen) -> str:
     content = _html.escape(block.content)
     caption = (
-        f'<div class="bn-formula__caption">{_html.escape(block.caption)}</div>'
+        f'<div class="bf-formula__caption">{_html.escape(block.caption)}</div>'
         if block.caption
         else ""
     )
     return (
-        f'<div class="bn-block bn-formula">'
-        f'<span class="bn-formula__content">\\({content}\\)</span>'
+        f'<div class="bf-block bf-formula">'
+        f'<span class="bf-formula__content">\\({content}\\)</span>'
         f"{caption}"
         f"</div>"
     )
@@ -125,15 +125,15 @@ def _render_bignumber(block: BigNumber, _: _IdGen) -> str:
         direction = "up" if block.is_upward_change else "down"
         arrow = "▲" if block.is_upward_change else "▼"
         change_html = (
-            f'<div class="bn-bignumber__change bn-bignumber__change--{direction}">'
+            f'<div class="bf-bignumber__change bf-bignumber__change--{direction}">'
             f"{arrow} {_html.escape(block.change)}"
             f"</div>"
         )
 
     return (
-        f'<div class="bn-block bn-bignumber">'
-        f'<div class="bn-bignumber__heading">{heading}</div>'
-        f'<div class="bn-bignumber__value">{value}</div>'
+        f'<div class="bf-block bf-bignumber">'
+        f'<div class="bf-bignumber__heading">{heading}</div>'
+        f'<div class="bf-bignumber__value">{value}</div>'
         f"{change_html}"
         f"</div>"
     )
@@ -143,14 +143,14 @@ def _render_bignumber(block: BigNumber, _: _IdGen) -> str:
 def _render_alert(block: Alert, _: _IdGen) -> str:
     level = block.level.value
     title_html = (
-        f'<div class="bn-alert__title">{_html.escape(block.title)}</div>'
+        f'<div class="bf-alert__title">{_html.escape(block.title)}</div>'
         if block.title
         else ""
     )
     return (
-        f'<div class="bn-block bn-alert bn-alert--{level}" role="alert">'
+        f'<div class="bf-block bf-alert bf-alert--{level}" role="alert">'
         f"{title_html}"
-        f'<div class="bn-alert__message">{_html.escape(block.message)}</div>'
+        f'<div class="bf-alert__message">{_html.escape(block.message)}</div>'
         f"</div>"
     )
 
@@ -163,12 +163,12 @@ def _render_group(block: Group, idgen: _IdGen) -> str:
         cols_css = " ".join(f"{w}fr" for w in block.widths)
         style = f'style="grid-template-columns: {cols_css};"'
     else:
-        style = f'style="--bn-cols: {block.columns};"'
+        style = f'style="--bf-cols: {block.columns};"'
 
     valign_cls = (
-        f" bn-group--valign-{block.valign}" if block.valign != VAlign.TOP else ""
+        f" bf-group--valign-{block.valign}" if block.valign != VAlign.TOP else ""
     )
-    return f'<div class="bn-block bn-group{valign_cls}" {style}>{inner}</div>'
+    return f'<div class="bf-block bf-group{valign_cls}" {style}>{inner}</div>'
 
 
 @renderer_for(Select)
@@ -183,19 +183,19 @@ def _render_select(block: Select, idgen: _IdGen) -> str:
             panel_id = f"{uid}-panel-{i}"
             label = _html.escape(child.label or f"Tab {i + 1}")
             tabs_html += (
-                f'<button class="bn-select__tab" role="tab" '
+                f'<button class="bf-select__tab" role="tab" '
                 f'id="{tab_id}" aria-controls="{panel_id}">'
                 f"{label}</button>"
             )
             panel_html = _render_block(child, idgen)
             panels_html += (
-                f'<div class="bn-select__panel" role="tabpanel" '
+                f'<div class="bf-select__panel" role="tabpanel" '
                 f'id="{panel_id}" aria-labelledby="{tab_id}">'
                 f"{panel_html}</div>"
             )
         return (
-            f'<div class="bn-block bn-select" id="{uid}">'
-            f'<div class="bn-select__tablist" role="tablist">{tabs_html}</div>'
+            f'<div class="bf-block bf-select" id="{uid}">'
+            f'<div class="bf-select__tablist" role="tablist">{tabs_html}</div>'
             f"{panels_html}"
             f"</div>"
         )
@@ -207,10 +207,10 @@ def _render_select(block: Select, idgen: _IdGen) -> str:
             label = _html.escape(child.label or f"Option {i + 1}")
             options_html += f'<option value="{i}">{label}</option>'
             panel_html = _render_block(child, idgen)
-            panels_html += f'<div class="bn-select__panel">{panel_html}</div>'
+            panels_html += f'<div class="bf-select__panel">{panel_html}</div>'
         return (
-            f'<div class="bn-block bn-select bn-select--dropdown" id="{uid}">'
-            f'<select class="bn-select__select" aria-label="Select view">'
+            f'<div class="bf-block bf-select bf-select--dropdown" id="{uid}">'
+            f'<select class="bf-select__select" aria-label="Select view">'
             f"{options_html}</select>"
             f"{panels_html}"
             f"</div>"
@@ -223,19 +223,19 @@ def _render_toggle(block: Toggle, idgen: _IdGen) -> str:
     label = _html.escape(block.label or "Details")
     inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
     chevron = (
-        '<svg class="bn-toggle__icon" width="16" height="16" viewBox="0 0 20 20" '
+        '<svg class="bf-toggle__icon" width="16" height="16" viewBox="0 0 20 20" '
         'fill="currentColor" aria-hidden="true">'
         '<path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938'
         "a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 "
         '01.02-1.06z" clip-rule="evenodd"/></svg>'
     )
     return (
-        f'<div class="bn-block bn-toggle" id="{uid}">'
-        f'<button class="bn-toggle__header" aria-expanded="false" '
+        f'<div class="bf-block bf-toggle" id="{uid}">'
+        f'<button class="bf-toggle__header" aria-expanded="false" '
         f'aria-controls="{uid}-body">'
         f"<span>{label}</span>{chevron}"
         f"</button>"
-        f'<div class="bn-toggle__body" id="{uid}-body" hidden>{inner}</div>'
+        f'<div class="bf-toggle__body" id="{uid}-body" hidden>{inner}</div>'
         f"</div>"
     )
 
@@ -258,12 +258,12 @@ def _render_datatable(block: DataTable, _: _IdGen) -> str:
 def _render_placeholder(block: Block, _: _IdGen) -> str:
     name = _html.escape(type(block).__name__)
     hint = (
-        " — install its subpackage (e.g. bulletin[lab])"
-        if type(block).__module__.startswith("bulletin.")
+        " — install its subpackage (e.g. briefing[lab])"
+        if type(block).__module__.startswith("briefing.")
         else ""
     )
     return (
-        f'<div class="bn-block bn-placeholder">'
+        f'<div class="bf-block bf-placeholder">'
         f"⚙ <strong>{name}</strong> has no registered renderer{hint}."
         f"</div>"
     )
@@ -273,9 +273,9 @@ def _render_placeholder(block: Block, _: _IdGen) -> str:
 
 
 def _render_block(block: Block, idgen: _IdGen) -> str:
-    if isinstance(block, Bulletin):
+    if isinstance(block, Briefing):
         inner = "\n".join(_render_block(b, idgen) for b in block.blocks)
-        return f'<div class="bn-blocks">{inner}</div>'
+        return f'<div class="bf-blocks">{inner}</div>'
 
     renderer = lookup_renderer(block)
     if renderer is not None:
@@ -304,7 +304,7 @@ def _resolve_now(now: datetime | None) -> datetime:
 
 
 def render_report(
-    blocks: Bulletin,
+    blocks: Briefing,
     name: str = "Report",
     formatting: Formatting | None = None,
     now: datetime | None = None,
@@ -321,7 +321,7 @@ def render_report(
     libraries = scan_for_plots(normalised)
     head_scripts = get_runtime_scripts(libraries)
 
-    # Pre-pass: collect JS assets that optional blocks (e.g. bulletin.lab's
+    # Pre-pass: collect JS assets that optional blocks (e.g. briefing.lab's
     # DataDive) need, so the core report.js stays lean when they're unused.
     extra_js: list[str] = []
     for block in iter_blocks(normalised):

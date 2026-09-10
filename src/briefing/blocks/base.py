@@ -5,7 +5,7 @@ import re
 import typing as t
 from collections.abc import Sequence
 
-from bulletin._error import BulletinError
+from briefing._error import BriefingError
 
 _NAME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9_-]*$")
 _MAX_LABEL_LEN = 256
@@ -16,7 +16,7 @@ BlockOrPrimitive = t.Union["Block", t.Any]
 
 
 class Block:
-    """Base class for all bulletin blocks.
+    """Base class for all briefing blocks.
 
     All blocks carry an optional ``name`` (a stable ID for referencing the
     block) and an optional ``label`` (a human-readable display string used
@@ -29,7 +29,7 @@ class Block:
         label: str | None = None,
     ) -> None:
         if name is not None and not _NAME_RE.match(name):
-            raise BulletinError(
+            raise BriefingError(
                 f"Invalid block name {name!r}: must start with a letter and contain "
                 "only letters, digits, underscores, or hyphens."
             )
@@ -81,28 +81,28 @@ def wrap_block(b: BlockOrPrimitive) -> Block:
     """Auto-wrap primitives into appropriate blocks.
 
     Supported auto-wrapping:
-    - ``str``       → :class:`~bulletin.blocks.text.Text`
-    - a dataframe   → :class:`~bulletin.blocks.asset.DataTable`
+    - ``str``       → :class:`~briefing.blocks.text.Text`
+    - a dataframe   → :class:`~briefing.blocks.asset.DataTable`
       (pandas / polars / pyarrow / dataframe-interchange objects)
     """
     if isinstance(b, Block):
         return b
 
     if isinstance(b, str):
-        from bulletin.blocks.text import Text
+        from briefing.blocks.text import Text
 
         return Text(text=b)
 
-    from bulletin._frames import looks_like_dataframe
+    from briefing._frames import looks_like_dataframe
 
     if looks_like_dataframe(b):
-        from bulletin.blocks.asset import DataTable
+        from briefing.blocks.asset import DataTable
 
         return DataTable(b)
 
-    raise BulletinError(
-        f"Cannot auto-wrap {type(b).__name__!r} into a bulletin block. "
-        "Pass a bulletin block, a string, or a dataframe."
+    raise BriefingError(
+        f"Cannot auto-wrap {type(b).__name__!r} into a briefing block. "
+        "Pass a briefing block, a string, or a dataframe."
     )
 
 

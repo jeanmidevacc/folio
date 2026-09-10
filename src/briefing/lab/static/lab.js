@@ -1,13 +1,13 @@
-/* bulletin.lab — DataDive interactive dot explorer. Vanilla JS, no deps.
+/* briefing.lab — DataDive interactive dot explorer. Vanilla JS, no deps.
    Inlined into a report only when a DataDive block is present. */
 (function () {
   'use strict';
 
-  document.querySelectorAll('.bn-datadive').forEach(function (container) {
-    var dataEl = container.querySelector('.bn-dd__data');
-    var metaEl = container.querySelector('.bn-dd__meta');
-    var svgEl  = container.querySelector('.bn-dd__plot');
-    var tip    = container.querySelector('.bn-dd__tooltip');
+  document.querySelectorAll('.bf-datadive').forEach(function (container) {
+    var dataEl = container.querySelector('.bf-dd__data');
+    var metaEl = container.querySelector('.bf-dd__meta');
+    var svgEl  = container.querySelector('.bf-dd__plot');
+    var tip    = container.querySelector('.bf-dd__tooltip');
     if (!dataEl || !metaEl || !svgEl) return;
 
     var layout = container.dataset.layout || 'scatter';
@@ -16,7 +16,7 @@
     var cols = Object.keys(meta);
     var selects = {};
 
-    container.querySelectorAll('.bn-dd__sel').forEach(function (sel) {
+    container.querySelectorAll('.bf-dd__sel').forEach(function (sel) {
       selects[sel.dataset.axis] = sel;
       sel.addEventListener('change', render);
     });
@@ -65,9 +65,9 @@
         if (pos === null) continue;
         var lbl = seen[i].length > 12 ? seen[i].slice(0, 11) + '…' : seen[i];
         if (axis === 'x') {
-          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + _esc(lbl) + '</text>';
+          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--bf-muted)">' + _esc(lbl) + '</text>';
         } else {
-          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--bn-muted)">' + _esc(lbl) + '</text>';
+          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--bf-muted)">' + _esc(lbl) + '</text>';
         }
       }
       return out;
@@ -84,11 +84,11 @@
         var pos = scale(v);
         var lbl = Math.abs(v) >= 1e4 ? v.toExponential(1) : +v.toPrecision(3) + '';
         if (axis === 'x') {
-          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + lbl + '</text>';
-          out += '<line x1="' + pos.toFixed(1) + '" y1="0" x2="' + pos.toFixed(1) + '" y2="' + PH + '" stroke="var(--bn-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
+          out += '<text x="' + pos.toFixed(1) + '" y="' + (PH + 18) + '" text-anchor="middle" font-size="10" fill="var(--bf-muted)">' + lbl + '</text>';
+          out += '<line x1="' + pos.toFixed(1) + '" y1="0" x2="' + pos.toFixed(1) + '" y2="' + PH + '" stroke="var(--bf-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
         } else {
-          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--bn-muted)">' + lbl + '</text>';
-          out += '<line x1="0" y1="' + pos.toFixed(1) + '" x2="' + PW + '" y2="' + pos.toFixed(1) + '" stroke="var(--bn-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
+          out += '<text x="-6" y="' + pos.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="10" fill="var(--bf-muted)">' + lbl + '</text>';
+          out += '<line x1="0" y1="' + pos.toFixed(1) + '" x2="' + PW + '" y2="' + pos.toFixed(1) + '" stroke="var(--bf-border)" stroke-width="0.5" stroke-dasharray="3,3"/>';
         }
       }
       return out;
@@ -143,14 +143,14 @@
 
       // Axes
       var axes = (
-        '<line x1="0" y1="' + PH + '" x2="' + PW + '" y2="' + PH + '" stroke="var(--bn-border)"/>' +
-        '<line x1="0" y1="0" x2="0" y2="' + PH + '" stroke="var(--bn-border)"/>' +
+        '<line x1="0" y1="' + PH + '" x2="' + PW + '" y2="' + PH + '" stroke="var(--bf-border)"/>' +
+        '<line x1="0" y1="0" x2="0" y2="' + PH + '" stroke="var(--bf-border)"/>' +
         xTicks + yTicks
       );
 
       // Axis labels
-      var xLbl = '<text x="' + (PW/2) + '" y="' + (PH + 38) + '" text-anchor="middle" font-size="12" fill="var(--bn-muted)">' + _esc(xCol) + '</text>';
-      var yLbl = '<text transform="rotate(-90)" x="-' + (PH/2) + '" y="-42" text-anchor="middle" font-size="12" fill="var(--bn-muted)">' + _esc(yCol) + '</text>';
+      var xLbl = '<text x="' + (PW/2) + '" y="' + (PH + 38) + '" text-anchor="middle" font-size="12" fill="var(--bf-muted)">' + _esc(xCol) + '</text>';
+      var yLbl = '<text transform="rotate(-90)" x="-' + (PH/2) + '" y="-42" text-anchor="middle" font-size="12" fill="var(--bf-muted)">' + _esc(yCol) + '</text>';
 
       // Dots
       var dots = '';
@@ -159,7 +159,7 @@
         var cy = yScale(yVals[i]);
         if (cx === null || cy === null) continue;
         var fill = cVals ? colorFn(cVals[i]) : PAL[0];
-        dots += '<circle class="bn-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.5" fill="' + fill + '" fill-opacity="0.72" data-i="' + i + '"/>';
+        dots += '<circle class="bf-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) + '" r="3.5" fill="' + fill + '" fill-opacity="0.72" data-i="' + i + '"/>';
       }
 
       svgEl.innerHTML = (
@@ -169,7 +169,7 @@
       );
 
       // Hover tooltip
-      svgEl.querySelectorAll('.bn-dd__dot').forEach(function (dot) {
+      svgEl.querySelectorAll('.bf-dd__dot').forEach(function (dot) {
         dot.addEventListener('mouseenter', function (e) {
           var row = rows[parseInt(dot.dataset.i, 10)];
           var lines = Object.keys(row).slice(0, 10).map(function (k) {
@@ -286,29 +286,29 @@
       xCats.forEach(function (xCat, xi) {
         var cx = LABEL_X + xi * cellW + cellW / 2;
         var lbl = xCat.length > 14 ? xCat.slice(0, 13) + '…' : xCat;
-        out += '<text x="' + cx.toFixed(1) + '" y="' + (LABEL_Y - 6) + '" text-anchor="middle" font-size="11" font-weight="600" fill="var(--bn-text)">' + _esc(lbl) + '</text>';
+        out += '<text x="' + cx.toFixed(1) + '" y="' + (LABEL_Y - 6) + '" text-anchor="middle" font-size="11" font-weight="600" fill="var(--bf-text)">' + _esc(lbl) + '</text>';
         // Column divider
         var dx = LABEL_X + xi * cellW;
-        out += '<line x1="' + dx + '" y1="' + LABEL_Y + '" x2="' + dx + '" y2="' + viewH + '" stroke="var(--bn-border)" stroke-width="0.5"/>';
+        out += '<line x1="' + dx + '" y1="' + LABEL_Y + '" x2="' + dx + '" y2="' + viewH + '" stroke="var(--bf-border)" stroke-width="0.5"/>';
       });
       // X-axis column header label
-      out += '<text x="' + (LABEL_X + (viewW - LABEL_X) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + _esc(xCol) + '</text>';
+      out += '<text x="' + (LABEL_X + (viewW - LABEL_X) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--bf-muted)">' + _esc(xCol) + '</text>';
 
       // Y-axis row headers
       yCats.forEach(function (yCat, yi) {
         var cy = LABEL_Y + yi * cellH + cellH / 2;
         var lbl = yCat.length > 12 ? yCat.slice(0, 11) + '…' : yCat;
-        out += '<text x="' + (LABEL_X - 8) + '" y="' + cy.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="11" font-weight="600" fill="var(--bn-text)">' + _esc(lbl) + '</text>';
+        out += '<text x="' + (LABEL_X - 8) + '" y="' + cy.toFixed(1) + '" text-anchor="end" dominant-baseline="middle" font-size="11" font-weight="600" fill="var(--bf-text)">' + _esc(lbl) + '</text>';
         // Row divider
         var dy = LABEL_Y + yi * cellH;
-        out += '<line x1="' + LABEL_X + '" y1="' + dy + '" x2="' + viewW + '" y2="' + dy + '" stroke="var(--bn-border)" stroke-width="0.5"/>';
+        out += '<line x1="' + LABEL_X + '" y1="' + dy + '" x2="' + viewW + '" y2="' + dy + '" stroke="var(--bf-border)" stroke-width="0.5"/>';
       });
       if (yCol) {
-        out += '<text transform="rotate(-90)" x="-' + (LABEL_Y + (viewH - LABEL_Y) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--bn-muted)">' + _esc(yCol) + '</text>';
+        out += '<text transform="rotate(-90)" x="-' + (LABEL_Y + (viewH - LABEL_Y) / 2) + '" y="12" text-anchor="middle" font-size="10" fill="var(--bf-muted)">' + _esc(yCol) + '</text>';
       }
 
       // Outer border
-      out += '<rect x="' + LABEL_X + '" y="' + LABEL_Y + '" width="' + (viewW - LABEL_X) + '" height="' + (viewH - LABEL_Y) + '" fill="none" stroke="var(--bn-border)"/>';
+      out += '<rect x="' + LABEL_X + '" y="' + LABEL_Y + '" width="' + (viewW - LABEL_X) + '" height="' + (viewH - LABEL_Y) + '" fill="none" stroke="var(--bf-border)"/>';
 
       // Dots per cell
       var dotEls = [];
@@ -328,7 +328,7 @@
 
             var cVal = colorCol ? rows[ri][colorCol] : null;
             var fill = colorCol ? colorFn(cVal) : PAL[0];
-            var el = '<circle class="bn-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
+            var el = '<circle class="bf-dd__dot" cx="' + cx.toFixed(1) + '" cy="' + cy.toFixed(1) +
               '" r="' + DOT_R + '" fill="' + fill + '" fill-opacity="0.8" data-i="' + ri + '"/>';
             out += el;
             dotEls.push(ri);
@@ -339,7 +339,7 @@
       svgEl.innerHTML = out;
 
       // Tooltip
-      svgEl.querySelectorAll('.bn-dd__dot').forEach(function (dot) {
+      svgEl.querySelectorAll('.bf-dd__dot').forEach(function (dot) {
         dot.addEventListener('mouseenter', function (e) {
           var row = rows[parseInt(dot.dataset.i, 10)];
           var lines = Object.keys(row).slice(0, 10).map(function (k) {
@@ -365,7 +365,7 @@
       if (layout === 'tile') renderTile(); else render();
     }
 
-    container.querySelectorAll('.bn-dd__sel').forEach(function (sel) {
+    container.querySelectorAll('.bf-dd__sel').forEach(function (sel) {
       sel.removeEventListener('change', render);
       sel.addEventListener('change', redraw);
     });

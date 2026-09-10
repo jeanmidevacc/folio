@@ -1,15 +1,15 @@
-/* bulletin report — interactive behaviour (tabs + toggles). Vanilla JS, no deps. */
+/* briefing report — interactive behaviour (tabs + toggles). Vanilla JS, no deps. */
 (function () {
   'use strict';
 
   // ── Select / tabs ───────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.bn-select:not(.bn-select--dropdown)').forEach(function (sel) {
-    var tablist = sel.querySelector(':scope > .bn-select__tablist');
+  document.querySelectorAll('.bf-select:not(.bf-select--dropdown)').forEach(function (sel) {
+    var tablist = sel.querySelector(':scope > .bf-select__tablist');
     if (!tablist) return;
 
-    var tabs   = Array.from(tablist.querySelectorAll('.bn-select__tab'));
-    var panels = Array.from(sel.querySelectorAll(':scope > .bn-select__panel'));
+    var tabs   = Array.from(tablist.querySelectorAll('.bf-select__tab'));
+    var panels = Array.from(sel.querySelectorAll(':scope > .bf-select__panel'));
 
     function activate(idx) {
       tabs.forEach(function (t, i) {
@@ -38,9 +38,9 @@
 
   // ── Select / dropdown ────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.bn-select--dropdown').forEach(function (sel) {
-    var select = sel.querySelector('.bn-select__select');
-    var panels = Array.from(sel.querySelectorAll('.bn-select__panel'));
+  document.querySelectorAll('.bf-select--dropdown').forEach(function (sel) {
+    var select = sel.querySelector('.bf-select__select');
+    var panels = Array.from(sel.querySelectorAll('.bf-select__panel'));
 
     function activate(idx) {
       panels.forEach(function (p, i) { p.hidden = i !== idx; });
@@ -57,14 +57,14 @@
 
   // ── DataTable ────────────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.bn-datatable').forEach(function (container) {
-    var tbody    = container.querySelector('.bn-dt__table tbody');
-    var search   = container.querySelector('.bn-dt__search');
-    var countEl  = container.querySelector('.bn-dt__count');
-    var pageInfo = container.querySelector('.bn-dt__page-info');
-    var prevBtn  = container.querySelector('.bn-dt__page-btn[data-dir="-1"]');
-    var nextBtn  = container.querySelector('.bn-dt__page-btn[data-dir="1"]');
-    var headers  = Array.from(container.querySelectorAll('.bn-dt__th'));
+  document.querySelectorAll('.bf-datatable').forEach(function (container) {
+    var tbody    = container.querySelector('.bf-dt__table tbody');
+    var search   = container.querySelector('.bf-dt__search');
+    var countEl  = container.querySelector('.bf-dt__count');
+    var pageInfo = container.querySelector('.bf-dt__page-info');
+    var prevBtn  = container.querySelector('.bf-dt__page-btn[data-dir="-1"]');
+    var nextBtn  = container.querySelector('.bf-dt__page-btn[data-dir="1"]');
+    var headers  = Array.from(container.querySelectorAll('.bf-dt__th'));
 
     if (!tbody) return;
 
@@ -136,7 +136,7 @@
 
   // ── Toggle ───────────────────────────────────────────────────────────────────
 
-  document.querySelectorAll('.bn-toggle__header').forEach(function (header) {
+  document.querySelectorAll('.bf-toggle__header').forEach(function (header) {
     var bodyId = header.getAttribute('aria-controls');
     var body   = bodyId ? document.getElementById(bodyId) : header.nextElementSibling;
 

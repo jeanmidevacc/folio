@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `bulletin` are documented here.
+All notable changes to `briefing` are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,9 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `bulletin.lab` subpackage for custom-visualisation blocks (`DataProfile`,
-  `DataDive`), installed via `pip install bulletin[lab]`.
-- Opt-in extras for every `Plot` backend: `bulletin[plotly]`, `[altair]`,
+- `briefing.lab` subpackage for custom-visualisation blocks (`DataProfile`,
+  `DataDive`), installed via `pip install briefing[lab]`.
+- Opt-in extras for every `Plot` backend: `briefing[plotly]`, `[altair]`,
   `[bokeh]`, `[matplotlib]`, and `[charts]` for all four.
 - Renderer registry (`@renderer_for` + MRO lookup) so block subclasses inherit
   a renderer.
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **pandas is now optional** — `pip install bulletin[pandas]`; `import bulletin`
+- **pandas is now optional** — `pip install briefing[pandas]`; `import briefing`
   no longer imports pandas.
 - The core install has zero visualisation-library dependencies. `Plot` imports a
   plotting library only when handed a figure from it.
@@ -36,11 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Deprecated
 
-- `bulletin.DataProfile` / `bulletin.DataDive` — use `bulletin.lab.DataProfile` /
-  `bulletin.lab.DataDive`. The top-level aliases warn and will be removed after
+- `briefing.DataProfile` / `briefing.DataDive` — use `briefing.lab.DataProfile` /
+  `briefing.lab.DataDive`. The top-level aliases warn and will be removed after
   0.2.
-- `bulletin.Blocks` / `BaseBlock` / `save_report` / `stringify_report` — use
-  `Bulletin` / `Block` / `save` / `stringify`. Removed after 0.2.
+- `briefing.Blocks` / `BaseBlock` / `save_report` / `stringify_report` — use
+  `Briefing` / `Block` / `save` / `stringify`. Removed after 0.2.
 
 ### Fixed
 
