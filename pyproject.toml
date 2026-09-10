@@ -1,17 +1,36 @@
 [build-system]
-requires = ["hatchling"]
+# <1.27 keeps the built metadata at version 2.3. 1.27+ emits 2.4/2.5, which
+# current `twine check` and some install toolchains still reject.
+requires = ["hatchling>=1.21,<1.27"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/bulletin/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bulletin"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/bulletin",
+    "tests",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "noxfile.py",
+    "pyproject.toml",
+]
+
 [project]
 name = "bulletin"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Build beautiful self-contained HTML reports from Python analysis"
 readme = "README.md"
 requires-python = ">=3.11"
+# Kept as a text table (not the PEP 639 SPDX string) so the built metadata stays
+# at version 2.2 — `twine check` and older toolchains choke on metadata 2.4/2.5.
 license = { text = "Apache-2.0" }
+authors = [{ name = "jeanmidevacc" }]
 keywords = ["data", "reporting", "html", "pandas", "polars", "visualization"]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -22,6 +41,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Visualization",
+    "Typing :: Typed",
 ]
 # The core install has ZERO visualisation-library dependencies. It renders the
 # report grammar (Text, Table, BigNumber, layout, ...) with only Jinja2 +
@@ -34,6 +54,12 @@ dependencies = [
     "jinja2>=3.1",
     "markdown-it-py>=3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/jeanmidevacc/folio"
+Repository = "https://github.com/jeanmidevacc/folio"
+Issues = "https://github.com/jeanmidevacc/folio/issues"
+Changelog = "https://github.com/jeanmidevacc/folio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 # pip install bulletin[pandas] — internal engine for Table / DataTable
